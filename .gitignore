@@ -22,3 +22,5 @@ prisma/dev.db-shm
 # 临时文件
 migrate-to-postgres.sql
 setup-db.sh
+seed-production.sh
+*.dump
