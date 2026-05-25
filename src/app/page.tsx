@@ -153,7 +153,7 @@ export default async function HomePage({ searchParams }: PageProps) {
                         </Link>
                       ))}
                       <span>
-                        提问者 <strong>{question.author.name}</strong>
+                        提问者 <Link href={`/profile?userId=${question.author.id}`} className="link"><strong>{question.author.name}</strong></Link>
                       </span>
                       <span>{formatRelativeTime(question.createdAt)}</span>
                     </div>
@@ -198,7 +198,7 @@ export default async function HomePage({ searchParams }: PageProps) {
             </div>
             <div className="rank-list">
               {leaderboard.map((item, index) => (
-                <Link className="rank-item" href="/profile" key={item.id}>
+                <Link className="rank-item" href={`/profile?userId=${item.id}`} key={item.id}>
                   <span className={`avatar ${index === 0 ? "accent" : index === 1 ? "info" : ""}`}>
                     {initials(item.name)}
                   </span>

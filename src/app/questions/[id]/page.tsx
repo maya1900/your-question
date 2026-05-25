@@ -81,7 +81,7 @@ export default async function QuestionDetailPage({ params, searchParams }: PageP
                 </Link>
               ))}
               <span>
-                提问者 <strong>{question.author.name}</strong>
+                提问者 <Link href={`/profile?userId=${question.author.id}`} className="link"><strong>{question.author.name}</strong></Link>
               </span>
               <span>{formatRelativeTime(question.createdAt)}</span>
             </div>
@@ -126,8 +126,12 @@ export default async function QuestionDetailPage({ params, searchParams }: PageP
                     <article className={`answer-card ${accepted ? "accepted" : ""}`} id={`answer-${answer.id}`} key={answer.id}>
                       <div className="answer-meta">
                         {accepted ? <span className="status-pill solved">最佳答案</span> : null}
-                        <span className="avatar accent">{initials(answer.author.name)}</span>
-                        <strong>{answer.author.name}</strong>
+                        <Link href={`/profile?userId=${answer.author.id}`}>
+                          <span className="avatar accent">{initials(answer.author.name)}</span>
+                        </Link>
+                        <Link href={`/profile?userId=${answer.author.id}`} className="link">
+                          <strong>{answer.author.name}</strong>
+                        </Link>
                         <span className="score-pill">{answer.author.score} pts</span>
                         <span>{formatRelativeTime(answer.createdAt)}</span>
                       </div>

@@ -1,8 +1,9 @@
-import { ScoreEventType } from "@prisma/client";
+import { ScoreEventType, NotificationType } from "@prisma/client";
 import { scoreValues } from "@/lib/constants";
 import { hashPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { addScoreEvent } from "@/lib/score";
+import { createNotification } from "@/lib/notification";
 
 export type BusinessStatus =
   | "created"
@@ -16,7 +17,10 @@ export type BusinessStatus =
   | "self-vote"
   | "no-permission"
   | "inactive"
-  | "already-checked-in";
+  | "already-checked-in"
+  | "followed"
+  | "unfollowed"
+  | "self-follow";
 
 async function isAdmin(userId: string) {
   const user = await prisma.user.findUnique({
@@ -49,7 +53,7 @@ export async function createAnswerForUser({
 
   const question = await prisma.question.findUnique({
     where: { id: questionId },
-    select: { id: true, hiddenAt: true }
+    select: { id: true, hiddenAt: true, authorId: true, title: true }
   });
 
   if (!question) return { status: "missing" as const };
@@ -75,6 +79,16 @@ export async function createAnswerForUser({
       answerId: created.id
     });
 
+    // 通知问题作者
+    await createNotification(tx, {
+      userId: question.authorId,
+      actorId: userId,
+      type: NotificationType.QUESTION_ANSWERED,
+      message: `回答了你的问题「${question.title}」`,
+      questionId: question.id,
+      answerId: created.id
+    });
+
     return created;
   });
 
@@ -86,7 +100,7 @@ export async function toggleQuestionVoteForUser(userId: string, questionId: stri
 
   const question = await prisma.question.findUnique({
     where: { id: questionId },
-    select: { id: true, authorId: true, hiddenAt: true }
+    select: { id: true, authorId: true, hiddenAt: true, title: true }
   });
 
   if (!question) return { status: "missing" as const };
@@ -131,6 +145,15 @@ export async function toggleQuestionVoteForUser(userId: string, questionId: stri
       questionId: question.id
     });
 
+    // 通知问题作者
+    await createNotification(tx, {
+      userId: question.authorId,
+      actorId: userId,
+      type: NotificationType.QUESTION_UPVOTED,
+      message: `赞了你的问题「${question.title}」`,
+      questionId: question.id
+    });
+
     return "voted" as const;
   });
 
@@ -142,7 +165,14 @@ export async function toggleAnswerVoteForUser(userId: string, answerId: string) 
 
   const answer = await prisma.answer.findUnique({
     where: { id: answerId },
-    select: { id: true, authorId: true, questionId: true, hiddenAt: true, question: { select: { hiddenAt: true } } }
+    select: {
+      id: true,
+      authorId: true,
+      questionId: true,
+      hiddenAt: true,
+      body: true,
+      question: { select: { hiddenAt: true, title: true } }
+    }
   });
 
   if (!answer) return { status: "missing" as const };
@@ -185,6 +215,16 @@ export async function toggleAnswerVoteForUser(userId: string, answerId: string) 
       type: ScoreEventType.ANSWER_UPVOTED,
       points: scoreValues.upvote,
       message: "回答获得点赞",
+      questionId: answer.questionId,
+      answerId: answer.id
+    });
+
+    // 通知回答作者
+    await createNotification(tx, {
+      userId: answer.authorId,
+      actorId: userId,
+      type: NotificationType.ANSWER_UPVOTED,
+      message: `赞了你在「${answer.question.title}」下的回答`,
       questionId: answer.questionId,
       answerId: answer.id
     });
@@ -243,6 +283,16 @@ export async function acceptAnswerForUser(userId: string, answerId: string) {
       type: ScoreEventType.ANSWER_ACCEPTED,
       points: scoreValues.acceptedAnswer,
       message: "回答被采纳",
+      questionId: answer.questionId,
+      answerId: answer.id
+    });
+
+    // 通知回答作者
+    await createNotification(tx, {
+      userId: answer.authorId,
+      actorId: userId,
+      type: NotificationType.ANSWER_ACCEPTED,
+      message: `采纳了你在「${answer.question.title}」下的回答`,
       questionId: answer.questionId,
       answerId: answer.id
     });
@@ -666,4 +716,39 @@ export async function checkInForUser(userId: string) {
     continuousDays,
     totalPoints
   };
+}
+
+export async function toggleFollowForUser(userId: string, targetUserId: string) {
+  if (!(await isActiveUser(userId))) return { status: "inactive" as const };
+  if (userId === targetUserId) return { status: "self-follow" as const };
+
+  const targetUser = await prisma.user.findUnique({
+    where: { id: targetUserId },
+    select: { id: true, isActive: true }
+  });
+
+  if (!targetUser || !targetUser.isActive) return { status: "missing" as const };
+
+  const existing = await prisma.follow.findUnique({
+    where: {
+      followerId_followingId: {
+        followerId: userId,
+        followingId: targetUserId
+      }
+    }
+  });
+
+  if (existing) {
+    await prisma.follow.delete({ where: { id: existing.id } });
+    return { status: "unfollowed" as const };
+  }
+
+  await prisma.follow.create({
+    data: {
+      followerId: userId,
+      followingId: targetUserId
+    }
+  });
+
+  return { status: "followed" as const };
 }

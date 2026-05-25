@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getProfile, getCheckInStatus, getCheckInHistory } from "@/lib/data";
+import { getProfile, getCheckInStatus, getCheckInHistory, getFollowStats, isFollowing } from "@/lib/data";
 import { formatRelativeTime, initials } from "@/lib/format";
 import { getCurrentUser } from "@/lib/session";
 import { ProfileSettings } from "./_components/profile-settings";
 import { CheckInButton } from "@/components/checkin-button";
 import { CheckInCalendar } from "@/components/checkin-calendar";
+import { FollowButton } from "@/components/follow-button";
 
 export const dynamic = "force-dynamic";
 
@@ -50,10 +51,15 @@ export default async function ProfilePage({ searchParams }: PageProps) {
   const [user, raw] = await Promise.all([getCurrentUser(), searchParams]);
   if (!user) redirect("/auth");
 
-  const [profile, checkInStatus, checkInHistory] = await Promise.all([
-    getProfile(user.id),
-    getCheckInStatus(user.id),
-    getCheckInHistory(user.id, 30)
+  const userId = firstParam(raw.userId) ?? user.id;
+  const isOwnProfile = userId === user.id;
+
+  const [profile, checkInStatus, checkInHistory, followStats, userIsFollowing] = await Promise.all([
+    getProfile(userId),
+    isOwnProfile ? getCheckInStatus(user.id) : Promise.resolve({ hasCheckedInToday: false, continuousDays: 0, todayPoints: 0 }),
+    isOwnProfile ? getCheckInHistory(user.id, 30) : Promise.resolve([]),
+    getFollowStats(userId),
+    isOwnProfile ? Promise.resolve(false) : isFollowing(user.id, userId)
   ]);
   if (!profile) redirect("/auth");
 
@@ -84,7 +90,16 @@ export default async function ProfilePage({ searchParams }: PageProps) {
             <div>
               <h1>{profile.name}</h1>
               <p className="hint">近期累计获得 {profile.score} 积分。</p>
+              <div className="follow-stats">
+                <span>{followStats.followingCount} 关注</span>
+                <span>{followStats.followersCount} 粉丝</span>
+              </div>
             </div>
+            <FollowButton
+              targetUserId={userId}
+              isFollowing={userIsFollowing}
+              isOwnProfile={isOwnProfile}
+            />
           </div>
           <div className="profile-card">
             <div className="rank-row">
@@ -103,7 +118,10 @@ export default async function ProfilePage({ searchParams }: PageProps) {
         <section className="panel">
           <div className="panel-title">
             <nav className="segmented">
-              {(["questions", "answers", "tags", "score", "checkin", "settings"] as TabType[]).map((item) => (
+              {(isOwnProfile
+                ? (["questions", "answers", "tags", "score", "checkin", "settings"] as TabType[])
+                : (["questions", "answers", "tags", "score"] as TabType[])
+              ).map((item) => (
                 <Link aria-current={tab === item} href={tabHref(item)} key={item}>
                   {item === "questions"
                     ? "问题"
@@ -186,7 +204,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
             </div>
           )}
 
-          {tab === "checkin" && (
+          {tab === "checkin" && isOwnProfile && (
             <div className="checkin-section">
               <CheckInButton
                 hasCheckedIn={checkInStatus.hasCheckedInToday}
@@ -196,7 +214,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
             </div>
           )}
 
-          {tab === "settings" && (
+          {tab === "settings" && isOwnProfile && (
             <ProfileSettings user={{ id: user.id, name: profile.name, email: profile.email }} />
           )}
         </section>

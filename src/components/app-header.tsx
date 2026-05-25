@@ -1,10 +1,12 @@
 import Link from "next/link";
-import { LogOut, Shield } from "lucide-react";
+import { LogOut, Shield, Bell } from "lucide-react";
 import { logoutAction } from "@/app/actions";
 import { getCurrentUser } from "@/lib/session";
+import { getUnreadNotificationCount } from "@/lib/data";
 
 export async function AppHeader() {
   const user = await getCurrentUser();
+  const unreadCount = user ? await getUnreadNotificationCount(user.id) : 0;
 
   return (
     <header className="app-header">
@@ -32,6 +34,17 @@ export async function AppHeader() {
         <div className="header-actions">
           {user ? (
             <>
+              <Link
+                className="icon-btn notification-btn"
+                href="/notifications"
+                aria-label="通知中心"
+                title="通知中心"
+              >
+                <Bell size={16} aria-hidden="true" />
+                {unreadCount > 0 && (
+                  <span className="notification-badge">{unreadCount > 99 ? "99+" : unreadCount}</span>
+                )}
+              </Link>
               {user.role === "ADMIN" ? (
                 <Link className="icon-btn" href="/admin" aria-label="管理后台" title="管理后台">
                   <Shield size={16} aria-hidden="true" />

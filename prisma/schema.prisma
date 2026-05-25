@@ -18,13 +18,17 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  questions        Question[]   @relation("QuestionAuthor")
-  answers          Answer[]     @relation("AnswerAuthor")
-  votes            Vote[]
-  scoreEvents      ScoreEvent[] @relation("ScoreOwner")
-  actedScoreEvents ScoreEvent[] @relation("ScoreActor")
-  sessions         Session[]
-  checkIns         CheckIn[]
+  questions              Question[]     @relation("QuestionAuthor")
+  answers                Answer[]       @relation("AnswerAuthor")
+  votes                  Vote[]
+  scoreEvents            ScoreEvent[]   @relation("ScoreOwner")
+  actedScoreEvents       ScoreEvent[]   @relation("ScoreActor")
+  sessions               Session[]
+  checkIns               CheckIn[]
+  notifications          Notification[] @relation("NotificationRecipient")
+  triggeredNotifications Notification[] @relation("NotificationActor")
+  following              Follow[]       @relation("Follower")
+  followers              Follow[]       @relation("Following")
 }
 
 model Session {
@@ -52,12 +56,13 @@ model Question {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  author         User          @relation("QuestionAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  acceptedAnswer Answer?       @relation("AcceptedAnswer", fields: [acceptedAnswerId], references: [id])
-  answers        Answer[]      @relation("QuestionAnswers")
+  author         User           @relation("QuestionAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  acceptedAnswer Answer?        @relation("AcceptedAnswer", fields: [acceptedAnswerId], references: [id])
+  answers        Answer[]       @relation("QuestionAnswers")
   tags           QuestionTag[]
   votes          Vote[]
-  scoreEvents    ScoreEvent[]  @relation("QuestionScoreEvents")
+  scoreEvents    ScoreEvent[]   @relation("QuestionScoreEvents")
+  notifications  Notification[]
 
   @@index([authorId])
   @@index([acceptedAnswerId])
@@ -74,11 +79,12 @@ model Answer {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  question    Question     @relation("QuestionAnswers", fields: [questionId], references: [id], onDelete: Cascade)
-  author      User         @relation("AnswerAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  acceptedFor Question?    @relation("AcceptedAnswer")
-  votes       Vote[]
-  scoreEvents ScoreEvent[] @relation("AnswerScoreEvents")
+  question      Question       @relation("QuestionAnswers", fields: [questionId], references: [id], onDelete: Cascade)
+  author        User           @relation("AnswerAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  acceptedFor   Question?      @relation("AcceptedAnswer")
+  votes         Vote[]
+  scoreEvents   ScoreEvent[]   @relation("AnswerScoreEvents")
+  notifications Notification[]
 
   @@index([questionId])
   @@index([authorId])
@@ -174,4 +180,47 @@ model CheckIn {
   @@unique([userId, checkInDate])
   @@index([userId, checkInDate])
   @@index([checkInDate])
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  actorId    String?
+  type       NotificationType
+  message    String
+  questionId String?
+  answerId   String?
+  isRead     Boolean          @default(false)
+  createdAt  DateTime         @default(now())
+
+  user     User      @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor    User?     @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  question Question? @relation(fields: [questionId], references: [id], onDelete: SetNull)
+  answer   Answer?   @relation(fields: [answerId], references: [id], onDelete: SetNull)
+
+  @@index([userId, isRead, createdAt])
+  @@index([questionId])
+  @@index([answerId])
+}
+
+enum NotificationType {
+  QUESTION_ANSWERED
+  ANSWER_ACCEPTED
+  QUESTION_UPVOTED
+  ANSWER_UPVOTED
+  SYSTEM
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
 }

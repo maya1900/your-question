@@ -1368,3 +1368,102 @@ textarea.field {
     grid-template-columns: repeat(7, 1fr);
   }
 }
+
+/* Notification System */
+.notification-list {
+  display: grid;
+  gap: 0;
+}
+
+.notification-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: start;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s ease;
+}
+
+.notification-item:hover {
+  background: var(--surface-2);
+}
+
+.notification-item.unread {
+  background: var(--accent-soft);
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.notification-content {
+  display: grid;
+  gap: 8px;
+}
+
+.notification-content p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.notification-meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.notification-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: var(--danger);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.notification-btn {
+  position: relative;
+}
+
+.notification-btn .notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+}
+
+/* Follow System */
+.follow-stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.follow-stats span {
+  cursor: default;
+}
+
+.profile-id {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: start;
+}

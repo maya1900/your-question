@@ -814,3 +814,97 @@ export async function getCheckInHistory(userId: string, days: number = 30) {
     orderBy: { checkInDate: "desc" }
   });
 }
+
+export async function getNotifications(userId: string, limit: number = 20) {
+  return prisma.notification.findMany({
+    where: { userId },
+    include: {
+      actor: {
+        select: {
+          id: true,
+          name: true
+        }
+      },
+      question: {
+        select: {
+          id: true,
+          title: true
+        }
+      },
+      answer: {
+        select: {
+          id: true,
+          body: true
+        }
+      }
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit
+  });
+}
+
+export async function getUnreadNotificationCount(userId: string) {
+  return prisma.notification.count({
+    where: {
+      userId,
+      isRead: false
+    }
+  });
+}
+
+export async function getFollowStats(userId: string) {
+  const [followingCount, followersCount] = await Promise.all([
+    prisma.follow.count({ where: { followerId: userId } }),
+    prisma.follow.count({ where: { followingId: userId } })
+  ]);
+
+  return {
+    followingCount,
+    followersCount
+  };
+}
+
+export async function isFollowing(followerId: string, followingId: string) {
+  const follow = await prisma.follow.findUnique({
+    where: {
+      followerId_followingId: {
+        followerId,
+        followingId
+      }
+    }
+  });
+
+  return !!follow;
+}
+
+export async function getFollowingList(userId: string) {
+  return prisma.follow.findMany({
+    where: { followerId: userId },
+    include: {
+      following: {
+        select: {
+          id: true,
+          name: true,
+          score: true
+        }
+      }
+    },
+    orderBy: { createdAt: "desc" }
+  });
+}
+
+export async function getFollowersList(userId: string) {
+  return prisma.follow.findMany({
+    where: { followingId: userId },
+    include: {
+      follower: {
+        select: {
+          id: true,
+          name: true,
+          score: true
+        }
+      }
+    },
+    orderBy: { createdAt: "desc" }
+  });
+}

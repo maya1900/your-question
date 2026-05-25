@@ -17,13 +17,15 @@ import {
   deleteQuestionForAdmin,
   deleteAnswerForAdmin,
   deleteTagForAdmin,
-  checkInForUser
+  checkInForUser,
+  toggleFollowForUser
 } from "@/lib/business";
 import { normalizeTags } from "@/lib/data";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { addScoreEvent } from "@/lib/score";
 import { clearSession, createSession, getCurrentUser } from "@/lib/session";
+import { markNotificationAsRead, markAllNotificationsAsRead } from "@/lib/notification";
 import {
   adminPasswordResetSchema,
   adminUserSchema,
@@ -526,4 +528,38 @@ export async function checkInAction(): Promise<ActionState> {
   revalidatePath("/");
   revalidatePath("/profile");
   return success(`签到成功！连续签到 ${result.continuousDays} 天，获得 ${result.totalPoints} 积分。`);
+}
+
+export async function markNotificationReadAction(notificationId: string): Promise<ActionState> {
+  const user = await requireUser();
+  await markNotificationAsRead(notificationId, user.id);
+  revalidatePath("/notifications");
+  return success("已标记为已读");
+}
+
+export async function markAllNotificationsReadAction(): Promise<ActionState> {
+  const user = await requireUser();
+  await markAllNotificationsAsRead(user.id);
+  revalidatePath("/notifications");
+  return success("已全部标记为已读");
+}
+
+export async function toggleFollowAction(targetUserId: string): Promise<ActionState> {
+  const user = await requireUser();
+  const result = await toggleFollowForUser(user.id, targetUserId);
+
+  if (result.status === "self-follow") {
+    return fail("不能关注自己");
+  }
+
+  if (result.status === "missing") {
+    return fail("用户不存在");
+  }
+
+  if (result.status === "inactive") {
+    return fail("账号已被停用");
+  }
+
+  revalidatePath("/profile");
+  return success(result.status === "followed" ? "关注成功" : "已取消关注");
 }
