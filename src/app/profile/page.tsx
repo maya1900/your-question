@@ -124,7 +124,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
             <nav className="segmented">
               {(isOwnProfile
                 ? (["questions", "answers", "tags", "score", "checkin", "settings"] as TabType[])
-                : (["questions", "answers", "tags", "score"] as TabType[])
+                : (["questions", "answers", "tags"] as TabType[])
               ).map((item) => (
                 <Link aria-current={tab === item} href={tabHref(item, isOwnProfile ? undefined : userId)} key={item}>
                   {item === "questions"
@@ -181,7 +181,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
             <div className="empty-state">标签功能开发中。</div>
           )}
 
-          {tab === "score" && (
+          {tab === "score" && isOwnProfile && (
             <div className="activity-list">
               {profile.scoreEvents.length ? (
                 profile.scoreEvents.map((event) => (
