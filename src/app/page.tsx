@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { Plus, Search } from "lucide-react";
+import { InfiniteQuestionList } from "@/components/infinite-question-list";
 import {
   defaultTagFilters,
   getLeaderboard,
   getQuestionStats,
-  getQuestions,
+  getQuestionsPage,
   getTags,
   type QuestionSort
 } from "@/lib/data";
-import { compactNumber, formatRelativeTime, initials } from "@/lib/format";
+import { initials } from "@/lib/format";
 import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -42,8 +43,8 @@ export default async function HomePage({ searchParams }: PageProps) {
   const tag = firstParam(raw.tag) ?? "all";
   const q = firstParam(raw.q) ?? "";
 
-  const [questions, tags, stats, leaderboard, user] = await Promise.all([
-    getQuestions({ sort, tag, query: q }),
+  const [questionsPage, tags, stats, leaderboard, user] = await Promise.all([
+    getQuestionsPage({ sort, tag, query: q }),
     getTags(),
     getQuestionStats(),
     getLeaderboard(),
@@ -120,50 +121,25 @@ export default async function HomePage({ searchParams }: PageProps) {
             </div>
           </div>
 
-          <div className="question-list">
-            {questions.length ? (
-              questions.map((question) => (
-                <article className="question-card" key={question.id}>
-                  <div className="vote-stack">
-                    <span className="metric">
-                      <strong>{question.votes.length}</strong>
-                      <span>票</span>
-                    </span>
-                    <span className="metric">
-                      <strong>{question.answers.length}</strong>
-                      <span>答</span>
-                    </span>
-                    <span className="metric">
-                      <strong>{compactNumber(question.views)}</strong>
-                      <span>阅</span>
-                    </span>
-                  </div>
-                  <div className="question-main">
-                    <h2 className="question-title">
-                      <Link href={`/questions/${question.id}`}>{question.title}</Link>
-                    </h2>
-                    <p className="question-excerpt">{question.body}</p>
-                    <div className="question-meta">
-                      <span className={`status-pill ${question.acceptedAnswerId ? "solved" : "open"}`}>
-                        {question.acceptedAnswerId ? "已解决" : "未解决"}
-                      </span>
-                      {question.tags.map(({ tag: item }) => (
-                        <Link className="tag" href={hrefWith(params, { tag: item.slug })} key={item.id}>
-                          {item.name}
-                        </Link>
-                      ))}
-                      <span>
-                        提问者 <Link href={`/profile?userId=${question.author.id}`} className="link"><strong>{question.author.name}</strong></Link>
-                      </span>
-                      <span>{formatRelativeTime(question.createdAt)}</span>
-                    </div>
-                  </div>
-                </article>
-              ))
-            ) : (
-              <div className="empty-state">没有匹配的问题。换个标签或关键词试试。</div>
-            )}
-          </div>
+          <InfiniteQuestionList
+            key={`${sort}:${tag}:${q}`}
+            initialItems={questionsPage.items.map((question) => ({
+              id: question.id,
+              title: question.title,
+              body: question.body,
+              views: question.views,
+              acceptedAnswerId: question.acceptedAnswerId,
+              createdAt: question.createdAt,
+              author: question.author,
+              tags: question.tags,
+              voteCount: question.votes.length,
+              answerCount: question.answers.length
+            }))}
+            initialNextPage={questionsPage.nextPage}
+            sort={sort}
+            tag={tag}
+            query={q}
+          />
         </div>
 
         <aside className="side-stack">

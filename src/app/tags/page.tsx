@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Search } from "lucide-react";
-import { getTags } from "@/lib/data";
+import { InfiniteTagList } from "@/components/infinite-tag-list";
+import { getTags, getTagsPage } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -15,10 +15,7 @@ function firstParam(value: string | string[] | undefined) {
 export default async function TagsPage({ searchParams }: PageProps) {
   const raw = await searchParams;
   const q = firstParam(raw.q)?.trim() ?? "";
-  const tags = await getTags();
-  const visible = q
-    ? tags.filter((tag) => `${tag.name} ${tag.slug}`.toLowerCase().includes(q.toLowerCase()))
-    : tags;
+  const [tags, tagsPage] = await Promise.all([getTags(), getTagsPage({ query: q })]);
 
   const hotThemes = tags
     .slice(0, 3)
@@ -39,29 +36,19 @@ export default async function TagsPage({ searchParams }: PageProps) {
           <Search size={18} aria-hidden="true" />
           <input type="search" name="q" defaultValue={q} placeholder="搜索标签" />
         </form>
-        <div className="tag-grid">
-          {visible.length ? (
-            visible.map((tag) => (
-              <article className="tag-card" key={tag.id}>
-                <div className="rank-row">
-                  <h3>{tag.name}</h3>
-                  <span className="status-pill open">{tag._count.questions} 个问题</span>
-                </div>
-                <p>
-                  {tag.unsolvedQuestionCount} 个未解决，{tag.solvedQuestionCount} 个已采纳。
-                </p>
-                <div className="tag-cloud">
-                  <Link className="tag selected" href={`/?tag=${tag.slug}`}>
-                    查看问题
-                  </Link>
-                  <span className="tag">{tag.slug}</span>
-                </div>
-              </article>
-            ))
-          ) : (
-            <div className="empty-state">没有匹配的标签。换个关键词试试。</div>
-          )}
-        </div>
+        <InfiniteTagList
+          key={q}
+          initialItems={tagsPage.items.map((tag) => ({
+            id: tag.id,
+            name: tag.name,
+            slug: tag.slug,
+            questionCount: tag.questionCount,
+            solvedQuestionCount: tag.solvedQuestionCount,
+            unsolvedQuestionCount: tag.unsolvedQuestionCount
+          }))}
+          initialNextPage={tagsPage.nextPage}
+          query={q}
+        />
       </section>
 
       <aside className="side-stack">

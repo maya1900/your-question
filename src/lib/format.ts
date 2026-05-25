@@ -1,5 +1,6 @@
-export function formatRelativeTime(value: Date) {
-  const diff = Date.now() - value.getTime();
+export function formatRelativeTime(value: Date | string) {
+  const date = typeof value === "string" ? new Date(value) : value;
+  const diff = Date.now() - date.getTime();
   const minute = 60 * 1000;
   const hour = minute * 60;
   const day = hour * 24;

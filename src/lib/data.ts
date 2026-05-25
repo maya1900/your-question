@@ -10,6 +10,9 @@ export type AdminQuestionStatus = AdminContentStatus | "solved" | "unsolved";
 export type AdminSort = "latest" | "oldest";
 
 const adminPageSize = 12;
+export const publicQuestionPageSize = 12;
+export const publicTagPageSize = 12;
+export const publicAnswerPageSize = 6;
 
 function boundedPage(page?: number) {
   if (!page || Number.isNaN(page) || page < 1) return 1;
@@ -32,13 +35,16 @@ export async function getQuestions({
   sort = "hot",
   tag,
   query,
-  limit = 24
+  limit = 24,
+  page = 1
 }: {
   sort?: QuestionSort;
   tag?: string;
   query?: string;
   limit?: number;
+  page?: number;
 }) {
+  const currentPage = boundedPage(page);
   const trimmedQuery = query?.trim();
   const trimmedTag = tag?.trim();
 
@@ -96,6 +102,7 @@ export async function getQuestions({
       }
     },
     orderBy: sort === "latest" ? { createdAt: "desc" } : { createdAt: "desc" },
+    skip: (currentPage - 1) * limit,
     take: limit
   });
 
@@ -110,6 +117,29 @@ export async function getQuestions({
   }
 
   return questionsWithCounts;
+}
+
+export async function getQuestionsPage(input: {
+  sort?: QuestionSort;
+  tag?: string;
+  query?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  const pageSize = input.pageSize ?? publicQuestionPageSize;
+  const page = boundedPage(input.page);
+  const questions = await getQuestions({
+    sort: input.sort,
+    tag: input.tag,
+    query: input.query,
+    limit: pageSize + 1,
+    page
+  });
+
+  return {
+    items: questions.slice(0, pageSize),
+    nextPage: questions.length > pageSize ? page + 1 : null
+  };
 }
 
 export async function getQuestionById(id: string) {
@@ -139,6 +169,18 @@ export async function getQuestionById(id: string) {
           id: true
         }
       },
+      _count: {
+        select: {
+          answers: {
+            where: {
+              hiddenAt: null,
+              author: {
+                isActive: true
+              }
+            }
+          }
+        }
+      },
       answers: {
         where: {
           hiddenAt: null,
@@ -146,6 +188,7 @@ export async function getQuestionById(id: string) {
             isActive: true
           }
         },
+        take: publicAnswerPageSize + 1,
         include: {
           author: {
             select: {
@@ -165,6 +208,57 @@ export async function getQuestionById(id: string) {
       }
     }
   });
+}
+
+export async function getQuestionAnswersPage({
+  questionId,
+  acceptedAnswerId,
+  page = 1,
+  pageSize = publicAnswerPageSize
+}: {
+  questionId: string;
+  acceptedAnswerId?: string | null;
+  page?: number;
+  pageSize?: number;
+}) {
+  const currentPage = boundedPage(page);
+  const answers = await prisma.answer.findMany({
+    where: {
+      questionId,
+      hiddenAt: null,
+      author: {
+        isActive: true
+      }
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          score: true
+        }
+      },
+      votes: {
+        select: {
+          id: true,
+          userId: true
+        }
+      }
+    },
+    orderBy: { createdAt: "asc" },
+    skip: (currentPage - 1) * pageSize,
+    take: pageSize + 1
+  });
+  const sorted = [...answers].sort((a, b) => {
+    if (a.id === acceptedAnswerId) return -1;
+    if (b.id === acceptedAnswerId) return 1;
+    return a.createdAt.getTime() - b.createdAt.getTime();
+  });
+
+  return {
+    items: sorted.slice(0, pageSize),
+    nextPage: answers.length > pageSize ? currentPage + 1 : null
+  };
 }
 
 async function getTagsFresh() {
@@ -233,6 +327,29 @@ async function getTagsFresh() {
 export const getTags = unstable_cache(getTagsFresh, ["public-tags"], {
   revalidate: 60
 });
+
+export async function getTagsPage({
+  query,
+  page = 1,
+  pageSize = publicTagPageSize
+}: {
+  query?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  const currentPage = boundedPage(page);
+  const trimmedQuery = query?.trim().toLowerCase();
+  const tags = await getTags();
+  const visible = trimmedQuery
+    ? tags.filter((tag) => `${tag.name} ${tag.slug}`.toLowerCase().includes(trimmedQuery))
+    : tags;
+  const start = (currentPage - 1) * pageSize;
+
+  return {
+    items: visible.slice(start, start + pageSize),
+    nextPage: visible.length > start + pageSize ? currentPage + 1 : null
+  };
+}
 
 export async function getProfile(userId: string) {
   return prisma.user.findUnique({

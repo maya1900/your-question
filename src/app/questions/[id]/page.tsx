@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check } from "lucide-react";
 import { notFound } from "next/navigation";
-import { acceptAnswerAction } from "@/app/actions";
 import { AnswerForm } from "@/components/answer-form";
-import { SubmitButton } from "@/components/submit-button";
-import { AnswerVoteForm, QuestionVoteForm } from "@/components/vote-form";
+import { InfiniteAnswerList } from "@/components/infinite-answer-list";
+import { QuestionVoteForm } from "@/components/vote-form";
 import { RichTextViewer } from "@/components/rich-text-viewer";
-import { getQuestionById, getRelatedQuestions } from "@/lib/data";
-import { compactNumber, formatRelativeTime, initials } from "@/lib/format";
+import { publicAnswerPageSize, getQuestionById, getRelatedQuestions } from "@/lib/data";
+import { compactNumber, formatRelativeTime } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -60,11 +58,13 @@ export default async function QuestionDetailPage({ params, searchParams }: PageP
   const notice = noticeText(rawSearch.notice);
   const canAccept = user?.id === question.authorId;
   const questionVoted = user ? question.votes.some((vote) => vote.userId === user.id) : false;
-  const answers = [...question.answers].sort((a, b) => {
+  const initialAnswers = [...question.answers].sort((a, b) => {
     if (a.id === question.acceptedAnswerId) return -1;
     if (b.id === question.acceptedAnswerId) return 1;
     return a.createdAt.getTime() - b.createdAt.getTime();
   });
+  const answers = initialAnswers.slice(0, publicAnswerPageSize);
+  const nextAnswerPage = initialAnswers.length > publicAnswerPageSize ? 2 : null;
 
   return (
     <main className="page-shell">
@@ -113,56 +113,28 @@ export default async function QuestionDetailPage({ params, searchParams }: PageP
           <section className="panel" style={{ marginTop: 20 }}>
             <div className="panel-title">
               <div>
-                <h2>{answers.length} 个回答</h2>
+                <h2>{question._count.answers} 个回答</h2>
                 <p>提问者可以采纳一个最佳答案。</p>
               </div>
             </div>
-            <div className="answer-list">
-              {answers.length ? (
-                answers.map((answer) => {
-                  const accepted = answer.id === question.acceptedAnswerId;
-                  const voted = user ? answer.votes.some((vote) => vote.userId === user.id) : false;
-
-                  return (
-                    <article className={`answer-card ${accepted ? "accepted" : ""}`} id={`answer-${answer.id}`} key={answer.id}>
-                      <div className="answer-meta">
-                        {accepted ? <span className="status-pill solved">最佳答案</span> : null}
-                        <Link href={`/profile?userId=${answer.author.id}`}>
-                          <span className="avatar accent">{initials(answer.author.name)}</span>
-                        </Link>
-                        <Link href={`/profile?userId=${answer.author.id}`} className="link">
-                          <strong>{answer.author.name}</strong>
-                        </Link>
-                        <span className="score-pill">{answer.author.score} pts</span>
-                        <span>{formatRelativeTime(answer.createdAt)}</span>
-                      </div>
-                      <div className="answer-content">
-                        {answer.summary ? <p><strong>{answer.summary}</strong></p> : null}
-                        <RichTextViewer content={answer.body} />
-                      </div>
-                      <div className="button-row" style={{ marginTop: 14 }}>
-                        <AnswerVoteForm
-                          answerId={answer.id}
-                          count={answer.votes.length}
-                          active={voted}
-                          disabled={user?.id === answer.authorId}
-                        />
-                        {canAccept ? (
-                          <form action={acceptAnswerAction}>
-                            <input type="hidden" name="answerId" value={answer.id} />
-                            <SubmitButton className="vote-button">
-                              <Check size={14} aria-hidden="true" /> {accepted ? "已采纳" : "采纳"}
-                            </SubmitButton>
-                          </form>
-                        ) : null}
-                      </div>
-                    </article>
-                  );
-                })
-              ) : (
-                <div className="empty-state">还没有回答。抢个头答，积分就来了。</div>
-              )}
-            </div>
+            <InfiniteAnswerList
+              key={`${question.id}:${question.acceptedAnswerId ?? "open"}`}
+              questionId={question.id}
+              initialItems={answers.map((answer) => ({
+                id: answer.id,
+                summary: answer.summary,
+                body: answer.body,
+                authorId: answer.authorId,
+                createdAt: answer.createdAt,
+                author: answer.author,
+                voteCount: answer.votes.length,
+                voted: user ? answer.votes.some((vote) => vote.userId === user.id) : false,
+                disabled: user?.id === answer.authorId,
+                accepted: answer.id === question.acceptedAnswerId
+              }))}
+              initialNextPage={nextAnswerPage}
+              canAccept={canAccept}
+            />
           </section>
 
           <section className="panel pad" style={{ marginTop: 20 }}>
@@ -189,7 +161,7 @@ export default async function QuestionDetailPage({ params, searchParams }: PageP
                 <span>赞同</span>
               </div>
               <div className="stat">
-                <strong>{answers.length}</strong>
+                <strong>{question._count.answers}</strong>
                 <span>回答</span>
               </div>
               <div className="stat">
