@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>发布问题 · 栈问</title>
+  <link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="topbar">
+      <a class="brand" href="../index.html"><span class="brand-mark">问</span><span>栈问</span></a>
+      <nav class="nav-links" aria-label="主导航">
+        <a class="nav-link" href="../index.html">入口</a>
+        <a class="nav-link" href="home.html">问题</a>
+        <a class="nav-link" href="tags.html">标签</a>
+        <a class="nav-link" href="profile.html">积分</a>
+      </nav>
+      <div class="header-actions">
+        <a class="btn ghost" href="auth.html">登录</a>
+        <a class="btn primary" href="ask.html">提问</a>
+        <button class="mobile-menu" type="button" aria-label="打开导航" aria-expanded="false" data-mobile-menu>☰</button>
+      </div>
+    </div>
+    <nav class="mobile-drawer" aria-label="移动导航" data-mobile-drawer>
+      <a class="nav-link" href="../index.html">入口</a>
+      <a class="nav-link" href="home.html">问题</a>
+      <a class="nav-link" href="tags.html">标签</a>
+      <a class="nav-link" href="profile.html">积分</a>
+      <a class="nav-link" href="auth.html">登录 / 注册</a>
+    </nav>
+  </header>
+
+  <main class="page-shell ask-layout">
+    <section class="panel pad">
+      <div class="page-title">
+        <h1>发布问题</h1>
+        <p>写清楚场景、已有尝试和期望结果，答案会更准确，积分也更容易拿到。</p>
+      </div>
+
+      <form class="form-grid" data-ask-form data-form-kind="question" data-points-base="10">
+        <div class="form-row">
+          <label for="ask-title">问题标题</label>
+          <input class="field" id="ask-title" name="title" placeholder="比如：租房潮湿时怎么防霉更有效？">
+          <p class="hint">尽量包含场景和目标，至少 12 个字。</p>
+          <p class="error-msg">标题太短了，别人看不懂你在问什么。</p>
+        </div>
+        <div class="form-row">
+          <label for="ask-tags">标签</label>
+          <input class="field" id="ask-tags" name="tags" placeholder="生活, 居家, 租房">
+          <p class="hint">至少选择 1 个标签，用逗号分隔。</p>
+          <p class="error-msg">至少填一个标签。</p>
+        </div>
+        <div class="form-row">
+          <label for="ask-body">问题描述</label>
+          <textarea class="field" id="ask-body" name="body" placeholder="描述背景、尝试过的方法、卡住的地方。"></textarea>
+          <p class="hint">建议说明背景、尝试过什么、你想得到什么答案。</p>
+          <p class="error-msg">描述至少 40 个字。</p>
+        </div>
+        <div class="form-row">
+          <label for="ask-details">补充信息</label>
+          <textarea class="field" id="ask-details" name="details" placeholder="例如预算、时间限制、地区、设备条件等。"></textarea>
+          <p class="hint">越具体，越容易得到可执行的回答。</p>
+        </div>
+        <div class="button-row">
+          <button class="btn primary" type="submit">发布问题</button>
+          <button class="btn" type="button" data-copy-preview="#ask-title">复制标题</button>
+          <span class="hint">预估提问积分 <strong data-points-preview>10</strong>。</span>
+        </div>
+        <div class="summary-card">
+          <h3>标题预览</h3>
+          <p data-ask-preview>问题标题会显示在这里</p>
+        </div>
+      </form>
+    </section>
+
+    <aside class="side-stack">
+      <section class="preview-card">
+        <h3>提问建议</h3>
+        <p>说清楚你已经尝试过什么，答案会更快聚焦。</p>
+        <div class="preview-list">
+          <div class="preview-item"><strong>场景</strong><span>居家、学习、工作、消费</span></div>
+          <div class="preview-item"><strong>结果</strong><span>想要一个具体可执行的方法</span></div>
+          <div class="preview-item"><strong>状态</strong><span>标题、正文、标签都通过后再提交</span></div>
+        </div>
+      </section>
+      <section class="summary-card">
+        <h3>积分说明</h3>
+        <div class="summary-grid">
+          <div class="summary-box"><strong>+10</strong><span>发布问题</span></div>
+          <div class="summary-box"><strong>+2</strong><span>好问题被点赞</span></div>
+          <div class="summary-box"><strong>+25</strong><span>问题下的回答被采纳</span></div>
+          <div class="summary-box"><strong>+15</strong><span>提交有效回答</span></div>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+  <script src="../assets/app.js"></script>
+</body>
+</html>

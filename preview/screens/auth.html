@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>登录 / 注册 · 栈问</title>
+  <link rel="stylesheet" href="../assets/app.css">
+</head>
+<body class="compact-body">
+  <header class="app-header">
+    <div class="topbar">
+      <a class="brand" href="../index.html"><span class="brand-mark">问</span><span>栈问</span></a>
+      <nav class="nav-links" aria-label="主导航">
+        <a class="nav-link" href="../index.html">入口</a>
+        <a class="nav-link" href="home.html">问题</a>
+        <a class="nav-link" href="tags.html">标签</a>
+        <a class="nav-link" href="profile.html">积分</a>
+      </nav>
+      <div class="header-actions">
+        <a class="btn ghost" aria-current="page" href="auth.html">登录</a>
+        <a class="btn primary" href="ask.html">提问</a>
+        <button class="mobile-menu" type="button" aria-label="打开导航" aria-expanded="false" data-mobile-menu>☰</button>
+      </div>
+    </div>
+    <nav class="mobile-drawer" aria-label="移动导航" data-mobile-drawer>
+      <a class="nav-link" href="../index.html">入口</a>
+      <a class="nav-link" href="home.html">问题</a>
+      <a class="nav-link" href="tags.html">标签</a>
+      <a class="nav-link" href="profile.html">积分</a>
+      <a class="nav-link" aria-current="page" href="auth.html">登录 / 注册</a>
+    </nav>
+  </header>
+
+  <main class="auth-shell">
+    <section class="auth-grid">
+      <div class="auth-copy">
+        <h1>欢迎回来，继续提问或回答。</h1>
+        <p>登录后可以发布问题、点赞回答、采纳最佳答案，并跟踪自己的积分和贡献记录。</p>
+      </div>
+      <div class="auth-card" data-auth-tabs>
+        <div class="segmented" style="margin-bottom:18px">
+          <button type="button" aria-pressed="true" data-auth-tab="login">登录</button>
+          <button type="button" aria-pressed="false" data-auth-tab="register">注册</button>
+        </div>
+        <div class="auth-panels">
+          <section class="auth-panel" data-auth-panel="login">
+            <form class="form-grid" data-auth-form="login">
+              <div class="form-row">
+                <label for="login-email">邮箱</label>
+                <input class="field" id="login-email" type="email" placeholder="name@example.com">
+                <p class="error-msg">请输入有效邮箱。</p>
+              </div>
+              <div class="form-row">
+                <label for="login-password">密码</label>
+                <input class="field" id="login-password" type="password" placeholder="至少 6 位">
+                <p class="error-msg">密码至少 6 位。</p>
+              </div>
+              <div class="button-row">
+                <button class="btn primary" type="submit">登录</button>
+                <span class="hint">登录后可以直接参与问答。</span>
+              </div>
+            </form>
+          </section>
+          <section class="auth-panel" data-auth-panel="register" hidden>
+            <form class="form-grid" data-auth-form="register">
+              <div class="form-row">
+                <label for="register-name">昵称</label>
+                <input class="field" id="register-name" type="text" placeholder="给自己取个好记的名字">
+                <p class="hint">昵称会显示在问题和回答里。</p>
+              </div>
+              <div class="form-row">
+                <label for="register-email">邮箱</label>
+                <input class="field" id="register-email" type="email" placeholder="name@example.com">
+                <p class="error-msg">请输入有效邮箱。</p>
+              </div>
+              <div class="form-row">
+                <label for="register-password">密码</label>
+                <input class="field" id="register-password" type="password" placeholder="至少 6 位">
+                <p class="error-msg">密码至少 6 位。</p>
+              </div>
+              <div class="button-row">
+                <button class="btn primary" type="submit">注册</button>
+                <span class="hint">注册后自动获得新用户积分。</span>
+              </div>
+            </form>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+  <script src="../assets/app.js"></script>
+</body>
+</html>

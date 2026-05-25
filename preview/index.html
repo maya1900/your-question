@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>栈问社区</title>
+  <link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="topbar">
+      <a class="brand" href="index.html" aria-label="栈问社区首页">
+        <span class="brand-mark">问</span>
+        <span>栈问</span>
+      </a>
+      <nav class="nav-links" aria-label="主导航">
+        <a class="nav-link" aria-current="page" href="index.html">入口</a>
+        <a class="nav-link" href="screens/home.html">问题</a>
+        <a class="nav-link" href="screens/tags.html">标签</a>
+        <a class="nav-link" href="screens/profile.html">积分</a>
+      </nav>
+      <div class="header-actions">
+        <a class="btn ghost" href="screens/auth.html">登录</a>
+        <a class="btn primary" href="screens/ask.html">提问</a>
+        <button class="mobile-menu" type="button" aria-label="打开导航" aria-expanded="false" data-mobile-menu>☰</button>
+      </div>
+    </div>
+    <nav class="mobile-drawer" aria-label="移动导航" data-mobile-drawer>
+      <a class="nav-link" aria-current="page" href="index.html">入口</a>
+      <a class="nav-link" href="screens/home.html">问题</a>
+      <a class="nav-link" href="screens/tags.html">标签</a>
+      <a class="nav-link" href="screens/profile.html">积分</a>
+      <a class="nav-link" href="screens/auth.html">登录 / 注册</a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero-strip">
+      <div>
+        <h1>面向所有人的中文问答社区。</h1>
+        <p>发布问题、回答问题、点赞有价值的内容，提问者可以采纳最佳答案。积分系统会把好问题、好答案和被采纳的贡献沉淀成可信声誉。</p>
+      </div>
+      <div class="hero-actions">
+        <a class="btn primary" href="screens/home.html">进入问题列表</a>
+        <a class="btn" href="screens/ask.html">发布问题</a>
+      </div>
+    </section>
+
+    <section class="page-grid with-sidebar">
+      <div class="panel pad">
+        <div class="page-title">
+          <h1>社区工作流</h1>
+          <p>每个屏幕都是独立页面，适合直接继续拆成前端路由或组件。</p>
+        </div>
+        <div class="launcher-grid">
+          <a class="launcher-card" href="screens/home.html">
+            <span class="status-pill open">列表</span>
+            <h2>首页问题列表</h2>
+            <p>按热度、最新、未解决排序，支持搜索和标签过滤。</p>
+            <span class="mini-meta">筛选、排序、问题卡</span>
+          </a>
+          <a class="launcher-card" href="screens/question.html">
+            <span class="status-pill solved">详情</span>
+            <h2>问题详情 / 回答区</h2>
+            <p>展示问题正文、回答、点赞和采纳最佳答案。</p>
+            <span class="mini-meta">点赞、采纳、回答输入</span>
+          </a>
+          <a class="launcher-card" href="screens/ask.html">
+            <span class="status-pill open">发布</span>
+            <h2>发布问题</h2>
+            <p>包含标题、标签、正文、预览和积分预估校验。</p>
+            <span class="mini-meta">表单校验、积分预估</span>
+          </a>
+          <a class="launcher-card" href="screens/profile.html">
+            <span class="score-pill">1284 pts</span>
+            <h2>用户个人页 / 积分</h2>
+            <p>展示积分等级、贡献历史、被采纳答案和近期动态。</p>
+            <span class="mini-meta">等级进度、贡献记录</span>
+          </a>
+          <a class="launcher-card" href="screens/tags.html">
+            <span class="status-pill">标签</span>
+            <h2>标签筛选页</h2>
+            <p>集中管理生活、学习、职场、消费和城市服务等标签。</p>
+            <span class="mini-meta">标签搜索、主题入口</span>
+          </a>
+          <a class="launcher-card" href="screens/auth.html">
+            <span class="status-pill">账号</span>
+            <h2>登录 / 注册</h2>
+            <p>面向社区贡献流的轻量账号入口，包含真实校验反馈。</p>
+            <span class="mini-meta">登录、注册、错误提示</span>
+          </a>
+        </div>
+      </div>
+
+      <aside class="side-stack">
+        <section class="panel pad">
+          <div class="panel-title" style="padding:0 0 14px;border-bottom:0">
+            <div>
+              <h2>积分规则</h2>
+              <p>让贡献被看见。</p>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat"><strong>+10</strong><span>发布清晰问题</span></div>
+            <div class="stat"><strong>+15</strong><span>提交有效回答</span></div>
+            <div class="stat"><strong>+25</strong><span>答案被采纳</span></div>
+            <div class="stat"><strong>+2</strong><span>内容获得点赞</span></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>热门标签</h2>
+              <p>今日讨论更集中。</p>
+            </div>
+          </div>
+          <div class="rank-list">
+            <a class="rank-item" href="screens/home.html">
+              <span class="tag selected">生活</span><span>家居收纳</span><span class="mini-meta">42</span>
+            </a>
+            <a class="rank-item" href="screens/home.html">
+              <span class="tag">学习</span><span>备考方法</span><span class="mini-meta">31</span>
+            </a>
+            <a class="rank-item" href="screens/home.html">
+              <span class="tag hot">职场</span><span>沟通协作</span><span class="mini-meta">18</span>
+            </a>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </main>
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+  <script src="assets/app.js"></script>
+</body>
+</html>

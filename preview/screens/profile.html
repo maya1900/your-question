@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>个人页 · 栈问</title>
+  <link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="topbar">
+      <a class="brand" href="../index.html"><span class="brand-mark">问</span><span>栈问</span></a>
+      <nav class="nav-links" aria-label="主导航">
+        <a class="nav-link" href="../index.html">入口</a>
+        <a class="nav-link" href="home.html">问题</a>
+        <a class="nav-link" href="tags.html">标签</a>
+        <a class="nav-link" aria-current="page" href="profile.html">积分</a>
+      </nav>
+      <div class="header-actions">
+        <a class="btn ghost" href="auth.html">登录</a>
+        <a class="btn primary" href="ask.html">提问</a>
+        <button class="mobile-menu" type="button" aria-label="打开导航" aria-expanded="false" data-mobile-menu>☰</button>
+      </div>
+    </div>
+    <nav class="mobile-drawer" aria-label="移动导航" data-mobile-drawer>
+      <a class="nav-link" href="../index.html">入口</a>
+      <a class="nav-link" href="home.html">问题</a>
+      <a class="nav-link" href="tags.html">标签</a>
+      <a class="nav-link" aria-current="page" href="profile.html">积分</a>
+      <a class="nav-link" href="auth.html">登录 / 注册</a>
+    </nav>
+  </header>
+
+  <main class="page-shell profile-layout">
+    <section class="page-grid">
+      <div class="panel profile-head">
+        <div class="profile-id">
+          <span class="avatar accent">林</span>
+          <div>
+            <h1>林越</h1>
+            <p class="hint">认真回答生活和城市问题，近期累计获得 1,284 积分。</p>
+          </div>
+        </div>
+        <div class="profile-card" style="min-width:min(320px,100%)">
+          <div class="rank-row">
+            <strong>成长进度</strong>
+            <span class="score-pill">等级 8</span>
+          </div>
+          <div class="level-track">
+            <div class="progress"><span data-progress="74"></span></div>
+            <p>距离下一级还差 126 分。继续回答高质量问题会更快升级。</p>
+          </div>
+        </div>
+      </div>
+
+      <section class="panel" data-profile-feed>
+        <div class="panel-title">
+          <div><h2>贡献动态</h2><p>最近一周的问答和采纳记录。</p></div>
+          <div class="segmented" data-segmented>
+            <button type="button" aria-pressed="true" data-profile-filter="all">全部</button>
+            <button type="button" aria-pressed="false" data-profile-filter="question">提问</button>
+            <button type="button" aria-pressed="false" data-profile-filter="answer">回答</button>
+            <button type="button" aria-pressed="false" data-profile-filter="accept">采纳</button>
+          </div>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item" data-activity-item data-kind="question">
+            <span class="avatar">问</span>
+            <div>
+              <strong>发布问题</strong>
+              <p>出租屋太潮，衣服总有味道，怎么快速除湿和防霉？</p>
+            </div>
+            <span class="score-pill">+10</span>
+          </div>
+          <div class="activity-item" data-activity-item data-kind="answer">
+            <span class="avatar info">答</span>
+            <div>
+              <strong>提交回答</strong>
+              <p>先控湿，再收纳，再通风，获得 19 个赞同。</p>
+            </div>
+            <span class="score-pill">+15</span>
+          </div>
+          <div class="activity-item" data-activity-item data-kind="accept">
+            <span class="avatar accent">采</span>
+            <div>
+              <strong>回答被采纳</strong>
+              <p>“先把潮气来源拆开看”成为最佳答案。</p>
+            </div>
+            <span class="score-pill">+25</span>
+          </div>
+          <div class="activity-item" data-activity-item data-kind="answer">
+            <span class="avatar">答</span>
+            <div>
+              <strong>提交回答</strong>
+              <p>租房看房时怎么判断噪音、采光和周边配套。</p>
+            </div>
+            <span class="score-pill">+15</span>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <aside class="side-stack">
+      <section class="summary-card">
+        <h3>积分拆分</h3>
+        <div class="summary-grid">
+          <div class="summary-box"><strong>672</strong><span>回答积分</span></div>
+          <div class="summary-box"><strong>384</strong><span>采纳积分</span></div>
+          <div class="summary-box"><strong>156</strong><span>提问积分</span></div>
+          <div class="summary-box"><strong>72</strong><span>点赞积分</span></div>
+        </div>
+      </section>
+      <section class="profile-card">
+        <h3>擅长标签</h3>
+        <div class="tag-cloud">
+          <button class="tag-chip" type="button" aria-pressed="true">生活</button>
+          <button class="tag-chip" type="button" aria-pressed="true">居家</button>
+          <button class="tag-chip" type="button" aria-pressed="false">城市</button>
+          <button class="tag-chip" type="button" aria-pressed="false">学习</button>
+        </div>
+        <p>用户会更愿意在你常回答的领域看到你的内容。</p>
+      </section>
+    </aside>
+  </main>
+
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+  <script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>问题列表 · 栈问</title>
+  <link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="topbar">
+      <a class="brand" href="../index.html"><span class="brand-mark">问</span><span>栈问</span></a>
+      <nav class="nav-links" aria-label="主导航">
+        <a class="nav-link" href="../index.html">入口</a>
+        <a class="nav-link" aria-current="page" href="home.html">问题</a>
+        <a class="nav-link" href="tags.html">标签</a>
+        <a class="nav-link" href="profile.html">积分</a>
+      </nav>
+      <div class="header-actions">
+        <a class="btn ghost" href="auth.html">登录</a>
+        <a class="btn primary" href="ask.html">提问</a>
+        <button class="mobile-menu" type="button" aria-label="打开导航" aria-expanded="false" data-mobile-menu="">☰</button>
+      </div>
+    </div>
+    <nav class="mobile-drawer" aria-label="移动导航" data-mobile-drawer="">
+      <a class="nav-link" href="../index.html">入口</a>
+      <a class="nav-link" aria-current="page" href="home.html">问题</a>
+      <a class="nav-link" href="tags.html">标签</a>
+      <a class="nav-link" href="profile.html">积分</a>
+      <a class="nav-link" href="auth.html">登录 / 注册</a>
+    </nav>
+  </header>
+
+  <main class="page-shell" data-question-browser="">
+    <section class="hero-strip">
+      <div>
+        <h1>问题列表</h1>
+        <p>先筛出你能回答的问题，再把经验沉淀给后来的人。未解决问题会优先露出，采纳后状态自动归档。</p>
+      </div>
+      <div class="hero-actions">
+        <a class="btn primary" href="ask.html">发布问题</a>
+      </div>
+    </section>
+
+    <section class="page-grid with-sidebar">
+      <div class="panel">
+        <div class="panel-title">
+          <div>
+            <h2>全部问题</h2>
+            <p>支持按热度、最新、未解决排序。</p>
+          </div>
+        </div>
+        <div class="panel pad" style="border:0;border-radius:0;border-bottom:1px solid var(--border)">
+          <div class="toolbar">
+            <div class="search-box" style="flex:1 1 260px">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.2-4.2m1.2-5.3a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+              <input type="search" placeholder="搜索问题、标签或作者" data-question-search="">
+            </div>
+            <div class="segmented" data-segmented="" aria-label="排序方式">
+              <button type="button" aria-pressed="true" data-sort="hot" data-value="hot">热度</button>
+              <button type="button" aria-pressed="false" data-sort="latest" data-value="latest">最新</button>
+              <button type="button" aria-pressed="false" data-sort="unsolved" data-value="unsolved">未解决</button>
+            </div>
+          </div>
+          <div class="chip-row" style="margin-top:12px" data-tag-picker="">
+            <button class="tag selected" type="button" aria-pressed="true" data-filter-tag="all">全部</button>
+            <button class="tag" type="button" aria-pressed="false" data-filter-tag="life">生活</button>
+            <button class="tag" type="button" aria-pressed="false" data-filter-tag="study">学习</button>
+            <button class="tag" type="button" aria-pressed="false" data-filter-tag="work">职场</button>
+            <button class="tag" type="button" aria-pressed="false" data-filter-tag="buying">消费</button>
+            <button class="tag" type="button" aria-pressed="false" data-filter-tag="city">城市</button>
+          </div>
+        </div>
+        <div class="question-list">
+          <article class="question-card" data-question-card="" data-tags="life,home" data-hot="94" data-latest="6" data-solved="false">
+            <div class="vote-stack" style="font-weight: 400; width: 210px;">
+              <span class="metric"><strong>28</strong><span>票</span></span>
+              <span class="metric"><strong>3</strong><span>答</span></span>
+              <span class="metric"><strong>1.2k</strong><span>阅</span></span>
+            </div>
+            <div class="question-main">
+              <h2 class="question-title"><a href="question.html">出租屋太潮，衣服总有味道，大家平时怎么快速除湿和防霉？</a></h2>
+              <p class="question-excerpt">房间不大，南方回南天明显。想找不占地方、成本不高、长期有效的方法，不只是临时开空调除湿。</p>
+              <div class="question-meta">
+                <span class="status-pill open">未解决</span><span class="tag">生活</span><span class="tag">居家</span><span>提问者 <strong>林越</strong></span><span>12 分钟前</span>
+              </div>
+            </div>
+          </article>
+          <article class="question-card" data-question-card="" data-tags="study" data-hot="81" data-latest="4" data-solved="true">
+            <div class="vote-stack">
+              <span class="metric"><strong>41</strong><span>票</span></span>
+              <span class="metric"><strong>5</strong><span>答</span></span>
+              <span class="metric"><strong>3.8k</strong><span>阅</span></span>
+            </div>
+            <div class="question-main">
+              <h2 class="question-title"><a href="question.html">备考时总是中途走神，怎么安排复习节奏更容易坚持到最后？</a></h2>
+              <p class="question-excerpt">每天能完整专注的时间不长，想要一个不靠意志硬撑的节奏表。最好是能兼顾复盘和间隔记忆。</p>
+              <div class="question-meta">
+                <span class="status-pill solved">已解决</span><span class="tag">学习</span><span>采纳回答 <strong>周然</strong></span><span>38 分钟前</span>
+              </div>
+            </div>
+          </article>
+          <article class="question-card" data-question-card="" data-tags="work,career" data-hot="64" data-latest="5" data-solved="false">
+            <div class="vote-stack">
+              <span class="metric"><strong>17</strong><span>票</span></span>
+              <span class="metric"><strong>2</strong><span>答</span></span>
+              <span class="metric"><strong>812</strong><span>阅</span></span>
+            </div>
+            <div class="question-main">
+              <h2 class="question-title"><a href="question.html">和同事协作时总是信息对不上，怎么把沟通变得更清楚一点？</a></h2>
+              <p class="question-excerpt">需求经常口头变动，邮件和聊天记录分散，最后总要反复确认。想建立一套更稳定的沟通习惯。</p>
+              <div class="question-meta">
+                <span class="status-pill open">未解决</span><span class="tag hot">职场</span><span class="tag">沟通</span><span>提问者 <strong>许安</strong></span><span>1 小时前</span>
+              </div>
+            </div>
+          </article>
+          <article class="question-card" data-question-card="" data-tags="buying" data-hot="39" data-latest="3" data-solved="false">
+            <div class="vote-stack">
+              <span class="metric"><strong>9</strong><span>票</span></span>
+              <span class="metric"><strong>1</strong><span>答</span></span>
+              <span class="metric"><strong>354</strong><span>阅</span></span>
+            </div>
+            <div class="question-main">
+              <h2 class="question-title"><a href="question.html">家里要换净水器，前置、RO、超滤到底怎么选更省心？</a></h2>
+              <p class="question-excerpt">家里两位老人一台洗碗机，预算不是最紧，但想少踩坑。售前说法很多，想听真实使用经验。</p>
+              <div class="question-meta">
+                <span class="status-pill open">未解决</span><span class="tag">消费</span><span>提问者 <strong>阿岑</strong></span><span>2 小时前</span>
+              </div>
+            </div>
+          </article>
+          <article class="question-card" data-question-card="" data-tags="city,life" data-hot="34" data-latest="2" data-solved="true">
+            <div class="vote-stack">
+              <span class="metric"><strong>22</strong><span>票</span></span>
+              <span class="metric"><strong>4</strong><span>答</span></span>
+              <span class="metric"><strong>1.1k</strong><span>阅</span></span>
+            </div>
+            <div class="question-main">
+              <h2 class="question-title"><a href="question.html">第一次在新城市租房，怎么判断通勤、噪音和周边配套值不值得？</a></h2>
+              <p class="question-excerpt">网上地图看着都差不多，真住进去才会发现问题。希望有一套更系统的看房和踩点方法。</p>
+              <div class="question-meta">
+                <span class="status-pill solved">已解决</span><span class="tag">城市</span><span>采纳回答 <strong>顾澈</strong></span><span>昨天</span>
+              </div>
+            </div>
+          </article>
+          <article class="question-card" data-question-card="" data-tags="study,career" data-hot="28" data-latest="1" data-solved="false">
+            <div class="vote-stack">
+              <span class="metric"><strong>7</strong><span>票</span></span>
+              <span class="metric"><strong>0</strong><span>答</span></span>
+              <span class="metric"><strong>128</strong><span>阅</span></span>
+            </div>
+            <div class="question-main">
+              <h2 class="question-title"><a href="question.html">转岗前该怎么判断自己适不适合新方向？</a></h2>
+              <p class="question-excerpt">不是单纯看工资，也不想跟风。更想知道怎么结合兴趣、能力和现实条件做判断。</p>
+              <div class="question-meta">
+                <span class="status-pill open">未解决</span><span class="tag">学习</span><span class="tag">职场</span><span>提问者 <strong>孟舟</strong></span><span>刚刚</span>
+              </div>
+            </div>
+          </article>
+          <div class="empty-state" data-empty-state="">没有匹配的问题。换个标签或关键词试试。</div>
+        </div>
+      </div>
+
+      <aside class="side-stack">
+        <section class="panel pad">
+          <h2 style="margin:0 0 12px;font-size:16px">今日概览</h2>
+          <div class="stats-grid">
+            <div class="stat"><strong>36</strong><span>新问题</span></div>
+            <div class="stat"><strong>112</strong><span>新回答</span></div>
+            <div class="stat"><strong>18</strong><span>待采纳</span></div>
+            <div class="stat"><strong>7</strong><span>热门标签</span></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-title">
+            <div><h2>积分榜</h2><p>近 7 天贡献。</p></div>
+          </div>
+          <div class="rank-list">
+            <div class="rank-item"><span class="avatar accent">周</span><span>周然</span><span class="score-pill">842</span></div>
+            <div class="rank-item"><span class="avatar info">顾</span><span>顾澈</span><span class="score-pill">716</span></div>
+            <div class="rank-item"><span class="avatar">林</span><span>林越</span><span class="score-pill">588</span></div>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </main>
+  <div class="toast" data-toast="" role="status" aria-live="polite"></div>
+  <script src="../assets/app.js"></script>
+
+
+</body></html>
