@@ -30,11 +30,13 @@ function pagination(page: number, total: number, pageSize = adminPageSize) {
 export async function getQuestions({
   sort = "hot",
   tag,
-  query
+  query,
+  limit = 50
 }: {
   sort?: QuestionSort;
   tag?: string;
   query?: string;
+  limit?: number;
 }) {
   const trimmedQuery = query?.trim();
   const trimmedTag = tag?.trim();
@@ -69,31 +71,48 @@ export async function getQuestions({
       ...(sort === "unsolved" ? { acceptedAnswerId: null } : {})
     },
     include: {
-      author: true,
+      author: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          score: true
+        }
+      },
       tags: {
         include: {
           tag: true
         }
       },
-      votes: true,
-      answers: {
-        where: {
-          hiddenAt: null,
-          author: {
-            isActive: true
-          }
+      _count: {
+        select: {
+          votes: true,
+          answers: true
         }
       },
-      acceptedAnswer: true
+      acceptedAnswer: {
+        select: {
+          id: true
+        }
+      }
     },
-    orderBy: sort === "latest" ? { createdAt: "desc" } : { createdAt: "desc" }
+    orderBy: sort === "latest" ? { createdAt: "desc" } : { createdAt: "desc" },
+    take: limit
   });
 
+  // 手动添加 votes 和 answers 数组以保持兼容性
+  const questionsWithCounts = questions.map(q => ({
+    ...q,
+    votes: Array(q._count.votes).fill({}),
+    answers: Array(q._count.answers).fill({})
+  }));
+
   if (sort === "hot") {
-    return questions.sort((a, b) => hotScore(b) - hotScore(a));
+    return questionsWithCounts.sort((a, b) => hotScore(b) - hotScore(a));
   }
 
-  return questions;
+  return questionsWithCounts;
 }
 
 export async function getQuestionById(id: string) {
