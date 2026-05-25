@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { setUserActiveAction } from "@/app/actions";
+import { setUserActiveAction, deleteUserAction } from "@/app/actions";
 import { AdminNav } from "@/app/admin/_components/admin-nav";
 import { AdminPagination } from "@/app/admin/_components/pagination";
+import { DeleteButton } from "@/app/admin/_components/delete-button";
 import { getAdminUsers, type AdminUserStatus } from "@/lib/data";
 import { formatRelativeTime, initials } from "@/lib/format";
 import { getCurrentUser } from "@/lib/session";
@@ -106,6 +107,12 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                       {item.isActive ? "停用" : "启用"}
                     </button>
                   </form>
+                  <DeleteButton
+                    action={deleteUserAction}
+                    confirmMessage={`确定要删除用户「${item.name}」吗？\n\n此操作将永久删除该用户的所有问题、回答、投票和积分记录，且无法恢复。`}
+                    hiddenFields={{ userId: item.id, redirectTo }}
+                    disabled={item.id === currentUser?.id}
+                  />
                   <span className="score-pill">{item.score}</span>
                 </div>
               </div>

@@ -4,7 +4,9 @@ export const scoreValues = {
   questionCreated: 10,
   answerCreated: 15,
   acceptedAnswer: 25,
-  upvote: 2
+  upvote: 2,
+  dailyCheckIn: 5,
+  continuousCheckInBonus: 3
 } as const;
 
 export const tagOptions = [

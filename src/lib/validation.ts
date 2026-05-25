@@ -35,6 +35,20 @@ export const answerSchema = z.object({
   body: z.string().trim().min(10, "回答内容至少 10 个字。").max(5000, "回答内容最多 5000 个字。")
 });
 
+export const profileUpdateSchema = z.object({
+  name: z.string().trim().min(2, "昵称至少 2 个字。").max(24, "昵称最多 24 个字。"),
+  email: z.string().trim().email("请输入有效邮箱。")
+});
+
+export const passwordChangeSchema = z.object({
+  currentPassword: z.string().min(1, "请输入当前密码。"),
+  newPassword: z.string().min(6, "新密码至少 6 位。").max(128, "新密码最多 128 位。"),
+  confirmPassword: z.string().min(1, "请确认新密码。")
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "两次输入的密码不一致。",
+  path: ["confirmPassword"]
+});
+
 export function formString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";

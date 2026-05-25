@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { setQuestionHiddenAction } from "@/app/actions";
+import { setQuestionHiddenAction, deleteQuestionAction } from "@/app/actions";
 import { AdminNav } from "@/app/admin/_components/admin-nav";
 import { AdminPagination } from "@/app/admin/_components/pagination";
+import { DeleteButton } from "@/app/admin/_components/delete-button";
 import { getAdminQuestions, type AdminQuestionStatus, type AdminSort } from "@/lib/data";
 import { compactNumber, formatRelativeTime } from "@/lib/format";
 
@@ -128,6 +129,11 @@ export default async function AdminQuestionsPage({ searchParams }: PageProps) {
                       {question.hiddenAt ? "恢复" : "隐藏"}
                     </button>
                   </form>
+                  <DeleteButton
+                    action={deleteQuestionAction}
+                    confirmMessage={`确定要删除问题「${question.title}」吗？\n\n此操作将永久删除该问题的所有回答、投票和积分记录，且无法恢复。`}
+                    hiddenFields={{ questionId: question.id, redirectTo }}
+                  />
                   <span>{question._count.votes} 赞</span>
                   <span>{question._count.answers} 答</span>
                   <span>{compactNumber(question.views)} 阅</span>

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { setAnswerHiddenAction } from "@/app/actions";
+import { setAnswerHiddenAction, deleteAnswerAction } from "@/app/actions";
 import { AdminNav } from "@/app/admin/_components/admin-nav";
 import { AdminPagination } from "@/app/admin/_components/pagination";
+import { DeleteButton } from "@/app/admin/_components/delete-button";
 import { getAdminAnswers, type AdminContentStatus, type AdminSort } from "@/lib/data";
 import { formatRelativeTime } from "@/lib/format";
 
@@ -115,6 +116,11 @@ export default async function AdminAnswersPage({ searchParams }: PageProps) {
                         {answer.hiddenAt ? "恢复" : "隐藏"}
                       </button>
                     </form>
+                    <DeleteButton
+                      action={deleteAnswerAction}
+                      confirmMessage="确定要删除这条回答吗？\n\n此操作将永久删除该回答的所有投票和积分记录，且无法恢复。"
+                      hiddenFields={{ answerId: answer.id, questionId: answer.questionId, redirectTo }}
+                    />
                     {answer.question.acceptedAnswerId === answer.id ? <span className="status-pill solved">最佳</span> : null}
                     <span>{answer._count.votes} 赞</span>
                   </div>

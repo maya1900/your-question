@@ -15,7 +15,8 @@ export type BusinessStatus =
   | "conflict"
   | "self-vote"
   | "no-permission"
-  | "inactive";
+  | "inactive"
+  | "already-checked-in";
 
 async function isAdmin(userId: string) {
   const user = await prisma.user.findUnique({
@@ -432,4 +433,237 @@ export async function setAnswerHiddenForAdmin(adminId: string, answerId: string,
   });
 
   return { status: "updated" as const, questionId: answer.questionId };
+}
+
+export async function deleteUserForAdmin(adminId: string, userId: string) {
+  if (!(await isAdmin(adminId))) return { status: "no-permission" as const };
+  if (adminId === userId) return { status: "no-permission" as const };
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true }
+  });
+
+  if (!user) return { status: "missing" as const };
+
+  await prisma.user.delete({
+    where: { id: user.id }
+  });
+
+  return { status: "updated" as const };
+}
+
+export async function deleteQuestionForAdmin(adminId: string, questionId: string) {
+  if (!(await isAdmin(adminId))) return { status: "no-permission" as const };
+
+  const question = await prisma.question.findUnique({
+    where: { id: questionId },
+    include: {
+      author: true,
+      votes: true
+    }
+  });
+
+  if (!question) return { status: "missing" as const };
+
+  await prisma.$transaction(async (tx) => {
+    // 扣除创建问题的积分
+    await addScoreEvent(tx, {
+      userId: question.authorId,
+      actorId: adminId,
+      type: ScoreEventType.QUESTION_CREATED,
+      points: -scoreValues.questionCreated,
+      message: "问题被管理员删除",
+      questionId: question.id
+    });
+
+    // 扣除所有点赞的积分
+    for (const vote of question.votes) {
+      await addScoreEvent(tx, {
+        userId: question.authorId,
+        actorId: adminId,
+        type: ScoreEventType.QUESTION_UNVOTED,
+        points: -scoreValues.upvote,
+        message: "问题被删除，点赞积分扣除",
+        questionId: question.id
+      });
+    }
+
+    // 删除问题（级联删除会处理相关的回答、投票等）
+    await tx.question.delete({
+      where: { id: question.id }
+    });
+  });
+
+  return { status: "updated" as const };
+}
+
+export async function deleteAnswerForAdmin(adminId: string, answerId: string) {
+  if (!(await isAdmin(adminId))) return { status: "no-permission" as const };
+
+  const answer = await prisma.answer.findUnique({
+    where: { id: answerId },
+    include: {
+      author: true,
+      votes: true,
+      question: {
+        select: {
+          id: true,
+          acceptedAnswerId: true
+        }
+      }
+    }
+  });
+
+  if (!answer) return { status: "missing" as const };
+
+  await prisma.$transaction(async (tx) => {
+    // 扣除创建回答的积分
+    await addScoreEvent(tx, {
+      userId: answer.authorId,
+      actorId: adminId,
+      type: ScoreEventType.ANSWER_CREATED,
+      points: -scoreValues.answerCreated,
+      message: "回答被管理员删除",
+      questionId: answer.questionId,
+      answerId: answer.id
+    });
+
+    // 如果是被采纳的回答，扣除采纳积分
+    if (answer.question.acceptedAnswerId === answer.id) {
+      await addScoreEvent(tx, {
+        userId: answer.authorId,
+        actorId: adminId,
+        type: ScoreEventType.ANSWER_UNACCEPTED,
+        points: -scoreValues.acceptedAnswer,
+        message: "回答被删除，采纳积分扣除",
+        questionId: answer.questionId,
+        answerId: answer.id
+      });
+
+      // 清除问题的 acceptedAnswerId
+      await tx.question.update({
+        where: { id: answer.questionId },
+        data: { acceptedAnswerId: null }
+      });
+    }
+
+    // 扣除所有点赞的积分
+    for (const vote of answer.votes) {
+      await addScoreEvent(tx, {
+        userId: answer.authorId,
+        actorId: adminId,
+        type: ScoreEventType.ANSWER_UNVOTED,
+        points: -scoreValues.upvote,
+        message: "回答被删除，点赞积分扣除",
+        questionId: answer.questionId,
+        answerId: answer.id
+      });
+    }
+
+    // 删除回答
+    await tx.answer.delete({
+      where: { id: answer.id }
+    });
+  });
+
+  return { status: "updated" as const, questionId: answer.questionId };
+}
+
+export async function deleteTagForAdmin(adminId: string, tagId: string) {
+  if (!(await isAdmin(adminId))) return { status: "no-permission" as const };
+
+  const tag = await prisma.tag.findUnique({
+    where: { id: tagId },
+    select: { id: true }
+  });
+
+  if (!tag) return { status: "missing" as const };
+
+  await prisma.tag.delete({
+    where: { id: tag.id }
+  });
+
+  return { status: "updated" as const };
+}
+
+export async function checkInForUser(userId: string) {
+  if (!(await isActiveUser(userId))) return { status: "inactive" as const };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  // 检查今天是否已签到
+  const existingCheckIn = await prisma.checkIn.findFirst({
+    where: {
+      userId,
+      checkInDate: {
+        gte: today,
+        lt: tomorrow
+      }
+    }
+  });
+
+  if (existingCheckIn) {
+    return { status: "already-checked-in" as const };
+  }
+
+  // 获取昨天的签到记录
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayCheckIn = await prisma.checkIn.findFirst({
+    where: {
+      userId,
+      checkInDate: {
+        gte: yesterday,
+        lt: today
+      }
+    },
+    orderBy: { checkInDate: "desc" }
+  });
+
+  const continuousDays = yesterdayCheckIn ? yesterdayCheckIn.continuousDays + 1 : 1;
+  const basePoints = scoreValues.dailyCheckIn;
+  const bonusPoints = continuousDays >= 7 ? scoreValues.continuousCheckInBonus : 0;
+  const totalPoints = basePoints + bonusPoints;
+
+  const checkIn = await prisma.$transaction(async (tx) => {
+    const created = await tx.checkIn.create({
+      data: {
+        userId,
+        checkInDate: today,
+        points: totalPoints,
+        continuousDays
+      }
+    });
+
+    await addScoreEvent(tx, {
+      userId,
+      actorId: userId,
+      type: ScoreEventType.DAILY_CHECK_IN,
+      points: basePoints,
+      message: `每日签到（连续${continuousDays}天）`
+    });
+
+    if (bonusPoints > 0) {
+      await addScoreEvent(tx, {
+        userId,
+        actorId: userId,
+        type: ScoreEventType.CONTINUOUS_CHECK_IN_BONUS,
+        points: bonusPoints,
+        message: `连续签到${continuousDays}天奖励`
+      });
+    }
+
+    return created;
+  });
+
+  return {
+    status: "created" as const,
+    checkIn,
+    continuousDays,
+    totalPoints
+  };
 }

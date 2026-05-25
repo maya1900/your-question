@@ -12,7 +12,12 @@ import {
   acceptAnswerForUser,
   createAnswerForUser,
   toggleAnswerVoteForUser,
-  toggleQuestionVoteForUser
+  toggleQuestionVoteForUser,
+  deleteUserForAdmin,
+  deleteQuestionForAdmin,
+  deleteAnswerForAdmin,
+  deleteTagForAdmin,
+  checkInForUser
 } from "@/lib/business";
 import { normalizeTags } from "@/lib/data";
 import { hashPassword, verifyPassword } from "@/lib/password";
@@ -26,7 +31,9 @@ import {
   authSchema,
   formString,
   questionSchema,
-  registerSchema
+  registerSchema,
+  profileUpdateSchema,
+  passwordChangeSchema
 } from "@/lib/validation";
 
 export type ActionState = {
@@ -357,4 +364,166 @@ export async function setAnswerHiddenAction(formData: FormData) {
   revalidatePath("/admin/answers");
   if (questionId) revalidatePath(`/questions/${questionId}`);
   redirect(redirectTo);
+}
+
+export async function deleteUserAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const userId = formString(formData, "userId");
+  const redirectTo = safeAdminRedirectPath(formString(formData, "redirectTo"), "/admin/users");
+
+  const result = await deleteUserForAdmin(admin.id, userId);
+  if (result.status === "no-permission") {
+    redirect(`/admin/users?notice=no-permission`);
+  }
+  if (result.status === "missing") {
+    redirect(`/admin/users?notice=user-missing`);
+  }
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/admin/users");
+  redirect(redirectTo);
+}
+
+export async function deleteQuestionAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const questionId = formString(formData, "questionId");
+  const redirectTo = safeAdminRedirectPath(formString(formData, "redirectTo"), "/admin/questions");
+
+  const result = await deleteQuestionForAdmin(admin.id, questionId);
+  if (result.status === "no-permission") {
+    redirect(`/admin/questions?notice=no-permission`);
+  }
+  if (result.status === "missing") {
+    redirect(`/admin/questions?notice=question-missing`);
+  }
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/admin/questions");
+  redirect(redirectTo);
+}
+
+export async function deleteAnswerAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const answerId = formString(formData, "answerId");
+  const questionId = formString(formData, "questionId");
+  const redirectTo = safeAdminRedirectPath(formString(formData, "redirectTo"), "/admin/answers");
+
+  const result = await deleteAnswerForAdmin(admin.id, answerId);
+  if (result.status === "no-permission") {
+    redirect(`/admin/answers?notice=no-permission`);
+  }
+  if (result.status === "missing") {
+    redirect(`/admin/answers?notice=answer-missing`);
+  }
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/admin/answers");
+  if (questionId) revalidatePath(`/questions/${questionId}`);
+  redirect(redirectTo);
+}
+
+export async function deleteTagAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const tagId = formString(formData, "tagId");
+  const redirectTo = safeAdminRedirectPath(formString(formData, "redirectTo"), "/admin/tags");
+
+  const result = await deleteTagForAdmin(admin.id, tagId);
+  if (result.status === "no-permission") {
+    redirect(`/admin/tags?notice=no-permission`);
+  }
+  if (result.status === "missing") {
+    redirect(`/admin/tags?notice=tag-missing`);
+  }
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/admin/tags");
+  revalidatePath("/tags");
+  redirect(redirectTo);
+}
+
+export async function updateProfileAction(
+  _state: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const user = await requireUser();
+  const parsed = profileUpdateSchema.safeParse({
+    name: formString(formData, "name"),
+    email: formString(formData, "email")
+  });
+
+  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "信息填写不完整。");
+
+  const email = parsed.data.email.toLowerCase();
+
+  // 检查邮箱是否被其他用户使用
+  if (email !== user.email) {
+    const exists = await prisma.user.findUnique({ where: { email } });
+    if (exists) return fail("这个邮箱已被使用。");
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      name: parsed.data.name,
+      email
+    }
+  });
+
+  revalidatePath("/profile");
+  return success("个人资料已更新。");
+}
+
+export async function changePasswordAction(
+  _state: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const user = await requireUser();
+  const parsed = passwordChangeSchema.safeParse({
+    currentPassword: formString(formData, "currentPassword"),
+    newPassword: formString(formData, "newPassword"),
+    confirmPassword: formString(formData, "confirmPassword")
+  });
+
+  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "密码填写不完整。");
+
+  // 验证当前密码
+  const currentUser = await prisma.user.findUnique({
+    where: { id: user.id }
+  });
+
+  if (!currentUser) return fail("用户不存在。");
+
+  const valid = await verifyPassword(parsed.data.currentPassword, currentUser.passwordHash);
+  if (!valid) return fail("当前密码不正确。");
+
+  // 更新密码
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordHash: await hashPassword(parsed.data.newPassword)
+    }
+  });
+
+  return success("密码已更新。");
+}
+
+export async function checkInAction(): Promise<ActionState> {
+  const user = await requireUser();
+  const result = await checkInForUser(user.id);
+
+  if (result.status === "already-checked-in") {
+    return fail("今天已经签到过了。");
+  }
+
+  if (result.status === "inactive") {
+    return fail("账号已被停用。");
+  }
+
+  revalidatePath("/");
+  revalidatePath("/profile");
+  return success(`签到成功！连续签到 ${result.continuousDays} 天，获得 ${result.totalPoints} 积分。`);
 }

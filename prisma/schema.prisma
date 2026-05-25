@@ -24,6 +24,7 @@ model User {
   scoreEvents      ScoreEvent[] @relation("ScoreOwner")
   actedScoreEvents ScoreEvent[] @relation("ScoreActor")
   sessions         Session[]
+  checkIns         CheckIn[]
 }
 
 model Session {
@@ -151,9 +152,26 @@ enum ScoreEventType {
   ANSWER_UNVOTED
   ANSWER_ACCEPTED
   ANSWER_UNACCEPTED
+  DAILY_CHECK_IN
+  CONTINUOUS_CHECK_IN_BONUS
 }
 
 enum UserRole {
   USER
   ADMIN
+}
+
+model CheckIn {
+  id               String   @id @default(cuid())
+  userId           String
+  checkInDate      DateTime @default(now())
+  points           Int
+  continuousDays   Int      @default(1)
+  createdAt        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, checkInDate])
+  @@index([userId, checkInDate])
+  @@index([checkInDate])
 }

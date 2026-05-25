@@ -1,14 +1,19 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getProfile } from "@/lib/data";
+import { getProfile, getCheckInStatus, getCheckInHistory } from "@/lib/data";
 import { formatRelativeTime, initials } from "@/lib/format";
 import { getCurrentUser } from "@/lib/session";
+import { ProfileSettings } from "./_components/profile-settings";
+import { CheckInButton } from "@/components/checkin-button";
+import { CheckInCalendar } from "@/components/checkin-calendar";
 
 export const dynamic = "force-dynamic";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
+
+type TabType = "questions" | "answers" | "tags" | "score" | "checkin" | "settings";
 
 function firstParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
@@ -30,27 +35,29 @@ function eventTitle(type: string) {
     ANSWER_UPVOTED: "回答获得点赞",
     ANSWER_UNVOTED: "回答点赞取消",
     ANSWER_ACCEPTED: "回答被采纳",
-    ANSWER_UNACCEPTED: "采纳被改选"
+    ANSWER_UNACCEPTED: "采纳被改选",
+    DAILY_CHECK_IN: "每日签到",
+    CONTINUOUS_CHECK_IN_BONUS: "连续签到奖励"
   };
   return titles[type] ?? "积分变化";
 }
 
-function filterHref(kind: string) {
-  return kind === "all" ? "/profile" : `/profile?kind=${kind}`;
+function tabHref(tab: TabType) {
+  return tab === "questions" ? "/profile" : `/profile?tab=${tab}`;
 }
 
 export default async function ProfilePage({ searchParams }: PageProps) {
   const [user, raw] = await Promise.all([getCurrentUser(), searchParams]);
   if (!user) redirect("/auth");
 
-  const profile = await getProfile(user.id);
+  const [profile, checkInStatus, checkInHistory] = await Promise.all([
+    getProfile(user.id),
+    getCheckInStatus(user.id),
+    getCheckInHistory(user.id, 30)
+  ]);
   if (!profile) redirect("/auth");
 
-  const kind = firstParam(raw.kind) ?? "all";
-  const events =
-    kind === "all"
-      ? profile.scoreEvents
-      : profile.scoreEvents.filter((event) => eventKind(event.type) === kind);
+  const tab = (firstParam(raw.tab) ?? "questions") as TabType;
   const level = Math.max(1, Math.floor(profile.score / 160) + 1);
   const currentLevelBase = (level - 1) * 160;
   const nextLevelBase = level * 160;
@@ -95,50 +102,103 @@ export default async function ProfilePage({ searchParams }: PageProps) {
 
         <section className="panel">
           <div className="panel-title">
-            <div>
-              <h2>贡献动态</h2>
-              <p>最近的问答、采纳和点赞记录。</p>
-            </div>
-            <div className="segmented">
-              {["all", "question", "answer", "accept", "vote"].map((item) => (
-                <Link aria-current={kind === item} href={filterHref(item)} key={item}>
-                  {item === "all"
-                    ? "全部"
-                    : item === "question"
-                      ? "提问"
-                      : item === "answer"
-                        ? "回答"
-                        : item === "accept"
-                          ? "采纳"
-                          : "点赞"}
+            <nav className="segmented">
+              {(["questions", "answers", "tags", "score", "checkin", "settings"] as TabType[]).map((item) => (
+                <Link aria-current={tab === item} href={tabHref(item)} key={item}>
+                  {item === "questions"
+                    ? "问题"
+                    : item === "answers"
+                      ? "回答"
+                      : item === "tags"
+                        ? "标签"
+                        : item === "score"
+                          ? "积分"
+                          : item === "checkin"
+                            ? "签到"
+                            : "设置"}
                 </Link>
               ))}
+            </nav>
+          </div>
+
+          {tab === "questions" && (
+            <div className="content-list">
+              {profile.questions.length ? (
+                profile.questions.map((question) => (
+                  <Link className="content-item" href={`/questions/${question.id}`} key={question.id}>
+                    <div>
+                      <strong>{question.title}</strong>
+                      <p className="hint">{formatRelativeTime(question.createdAt)}</p>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="empty-state">还没有发布问题。</div>
+              )}
             </div>
-          </div>
-          <div className="activity-list">
-            {events.length ? (
-              events.map((event) => (
-                <div className="activity-item" key={event.id}>
-                  <span className={`avatar ${event.points > 0 ? "accent" : ""}`}>{event.points > 0 ? "+" : "-"}</span>
-                  <div>
-                    <strong>{eventTitle(event.type)}</strong>
-                    <p>
-                      {event.question?.title ??
-                        event.answer?.question.title ??
-                        event.message}{" "}
-                      · {formatRelativeTime(event.createdAt)}
-                    </p>
+          )}
+
+          {tab === "answers" && (
+            <div className="content-list">
+              {profile.answers.length ? (
+                profile.answers.map((answer) => (
+                  <Link className="content-item" href={`/questions/${answer.questionId}`} key={answer.id}>
+                    <div>
+                      <strong>{answer.question.title}</strong>
+                      <p className="hint">{formatRelativeTime(answer.createdAt)}</p>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="empty-state">还没有提交回答。</div>
+              )}
+            </div>
+          )}
+
+          {tab === "tags" && (
+            <div className="empty-state">标签功能开发中。</div>
+          )}
+
+          {tab === "score" && (
+            <div className="activity-list">
+              {profile.scoreEvents.length ? (
+                profile.scoreEvents.map((event) => (
+                  <div className="activity-item" key={event.id}>
+                    <span className={`avatar ${event.points > 0 ? "accent" : ""}`}>{event.points > 0 ? "+" : "-"}</span>
+                    <div>
+                      <strong>{eventTitle(event.type)}</strong>
+                      <p>
+                        {event.question?.title ??
+                          event.answer?.question.title ??
+                          event.message}{" "}
+                        · {formatRelativeTime(event.createdAt)}
+                      </p>
+                    </div>
+                    <span className="score-pill">
+                      {event.points > 0 ? "+" : ""}
+                      {event.points}
+                    </span>
                   </div>
-                  <span className="score-pill">
-                    {event.points > 0 ? "+" : ""}
-                    {event.points}
-                  </span>
-                </div>
-              ))
-            ) : (
-              <div className="empty-state">这个分类还没有动态。</div>
-            )}
-          </div>
+                ))
+              ) : (
+                <div className="empty-state">还没有积分记录。</div>
+              )}
+            </div>
+          )}
+
+          {tab === "checkin" && (
+            <div className="checkin-section">
+              <CheckInButton
+                hasCheckedIn={checkInStatus.hasCheckedInToday}
+                continuousDays={checkInStatus.continuousDays}
+              />
+              <CheckInCalendar checkIns={checkInHistory} />
+            </div>
+          )}
+
+          {tab === "settings" && (
+            <ProfileSettings user={{ id: user.id, name: profile.name, email: profile.email }} />
+          )}
         </section>
       </section>
 
@@ -162,25 +222,6 @@ export default async function ProfilePage({ searchParams }: PageProps) {
               <strong>{breakdown.vote}</strong>
               <span>点赞积分</span>
             </div>
-          </div>
-        </section>
-        <section className="profile-card">
-          <h3>近期内容</h3>
-          <div className="preview-list">
-            {profile.questions.slice(0, 3).map((question) => (
-              <Link className="preview-item" href={`/questions/${question.id}`} key={question.id}>
-                <strong>问</strong>
-                <span>{question.title}</span>
-                <span />
-              </Link>
-            ))}
-            {profile.answers.slice(0, 2).map((answer) => (
-              <Link className="preview-item" href={`/questions/${answer.questionId}`} key={answer.id}>
-                <strong>答</strong>
-                <span>{answer.question.title}</span>
-                <span />
-              </Link>
-            ))}
           </div>
         </section>
       </aside>

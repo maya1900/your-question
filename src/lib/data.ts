@@ -160,19 +160,40 @@ export async function getProfile(userId: string) {
       questions: {
         where: { hiddenAt: null },
         orderBy: { createdAt: "desc" },
-        take: 5
+        include: {
+          tags: {
+            include: {
+              tag: true
+            }
+          },
+          _count: {
+            select: {
+              answers: true,
+              votes: true
+            }
+          }
+        }
       },
       answers: {
         where: { hiddenAt: null, question: { hiddenAt: null } },
         orderBy: { createdAt: "desc" },
-        take: 5,
         include: {
-          question: true
+          question: {
+            select: {
+              id: true,
+              title: true
+            }
+          },
+          _count: {
+            select: {
+              votes: true
+            }
+          }
         }
       },
       scoreEvents: {
         orderBy: { createdAt: "desc" },
-        take: 12,
+        take: 50,
         include: {
           question: true,
           answer: {
@@ -180,6 +201,61 @@ export async function getProfile(userId: string) {
               question: true
             }
           }
+        }
+      }
+    }
+  });
+}
+
+export async function getUserProfile(userId: string) {
+  return prisma.user.findUnique({
+    where: { id: userId, isActive: true },
+    select: {
+      id: true,
+      name: true,
+      email: false,
+      score: true,
+      createdAt: true,
+      questions: {
+        where: { hiddenAt: null },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        include: {
+          tags: {
+            include: {
+              tag: true
+            }
+          },
+          _count: {
+            select: {
+              answers: true,
+              votes: true
+            }
+          }
+        }
+      },
+      answers: {
+        where: { hiddenAt: null, question: { hiddenAt: null } },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        include: {
+          question: {
+            select: {
+              id: true,
+              title: true
+            }
+          },
+          _count: {
+            select: {
+              votes: true
+            }
+          }
+        }
+      },
+      _count: {
+        select: {
+          questions: true,
+          answers: true
         }
       }
     }
@@ -686,4 +762,55 @@ export function hotScore(question: {
   answers: unknown[];
 }) {
   return question.votes.length * 3 + question.answers.length * 5 + question.views * 0.1;
+}
+
+export async function getCheckInStatus(userId: string) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const todayCheckIn = await prisma.checkIn.findFirst({
+    where: {
+      userId,
+      checkInDate: {
+        gte: today,
+        lt: tomorrow
+      }
+    }
+  });
+
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayCheckIn = await prisma.checkIn.findFirst({
+    where: {
+      userId,
+      checkInDate: {
+        gte: yesterday,
+        lt: today
+      }
+    }
+  });
+
+  return {
+    hasCheckedInToday: !!todayCheckIn,
+    continuousDays: todayCheckIn?.continuousDays ?? (yesterdayCheckIn?.continuousDays ?? 0),
+    todayPoints: todayCheckIn?.points ?? 0
+  };
+}
+
+export async function getCheckInHistory(userId: string, days: number = 30) {
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+  startDate.setHours(0, 0, 0, 0);
+
+  return prisma.checkIn.findMany({
+    where: {
+      userId,
+      checkInDate: {
+        gte: startDate
+      }
+    },
+    orderBy: { checkInDate: "desc" }
+  });
 }

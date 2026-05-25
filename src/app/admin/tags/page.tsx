@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
+import { deleteTagAction } from "@/app/actions";
 import { AdminNav } from "@/app/admin/_components/admin-nav";
 import { AdminPagination } from "@/app/admin/_components/pagination";
+import { DeleteButton } from "@/app/admin/_components/delete-button";
 import { getAdminTags } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +21,7 @@ export default async function AdminTagsPage({ searchParams }: PageProps) {
   const q = firstParam(raw.q)?.trim() ?? "";
   const page = Number(firstParam(raw.page) ?? "1");
   const { tags, pagination } = await getAdminTags({ query: q, page });
+  const redirectTo = q ? `/admin/tags?q=${encodeURIComponent(q)}` : "/admin/tags";
 
   return (
     <main className="page-shell admin-layout">
@@ -52,6 +55,11 @@ export default async function AdminTagsPage({ searchParams }: PageProps) {
                   <p>{tag.slug}</p>
                 </div>
                 <div className="admin-row-metrics">
+                  <DeleteButton
+                    action={deleteTagAction}
+                    confirmMessage={`确定要删除标签「${tag.name}」吗？\n\n此操作将删除该标签与所有问题的关联关系，且无法恢复。`}
+                    hiddenFields={{ tagId: tag.id, redirectTo }}
+                  />
                   <span>{tag.questionCount} 总问题</span>
                   <span>{tag.visibleQuestionCount} 公开</span>
                   <span>{tag.solvedQuestionCount} 已解决</span>
