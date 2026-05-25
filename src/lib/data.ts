@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { tagOptions } from "@/lib/constants";
 import { slugifyTag } from "@/lib/format";
+import { unstable_cache } from "next/cache";
 
 export type QuestionSort = "hot" | "latest" | "unsolved";
 export type AdminUserStatus = "all" | "active" | "inactive";
@@ -31,7 +32,7 @@ export async function getQuestions({
   sort = "hot",
   tag,
   query,
-  limit = 50
+  limit = 24
 }: {
   sort?: QuestionSort;
   tag?: string;
@@ -74,10 +75,7 @@ export async function getQuestions({
       author: {
         select: {
           id: true,
-          name: true,
-          email: true,
-          role: true,
-          score: true
+          name: true
         }
       },
       tags: {
@@ -101,8 +99,7 @@ export async function getQuestions({
     take: limit
   });
 
-  // 手动添加 votes 和 answers 数组以保持兼容性
-  const questionsWithCounts = questions.map(q => ({
+  const questionsWithCounts = questions.map((q) => ({
     ...q,
     votes: Array(q._count.votes).fill({}),
     answers: Array(q._count.answers).fill({})
@@ -119,14 +116,29 @@ export async function getQuestionById(id: string) {
   return prisma.question.findUnique({
     where: { id },
     include: {
-      author: true,
+      author: {
+        select: {
+          id: true,
+          name: true,
+          isActive: true
+        }
+      },
       tags: {
         include: {
           tag: true
         }
       },
-      votes: true,
-      acceptedAnswer: true,
+      votes: {
+        select: {
+          id: true,
+          userId: true
+        }
+      },
+      acceptedAnswer: {
+        select: {
+          id: true
+        }
+      },
       answers: {
         where: {
           hiddenAt: null,
@@ -135,8 +147,19 @@ export async function getQuestionById(id: string) {
           }
         },
         include: {
-          author: true,
-          votes: true
+          author: {
+            select: {
+              id: true,
+              name: true,
+              score: true
+            }
+          },
+          votes: {
+            select: {
+              id: true,
+              userId: true
+            }
+          }
         },
         orderBy: { createdAt: "asc" }
       }
@@ -144,33 +167,72 @@ export async function getQuestionById(id: string) {
   });
 }
 
-export async function getTags() {
+async function getTagsFresh() {
   const tags = await prisma.tag.findMany({
     include: {
       _count: {
         select: {
           questions: true
         }
-      },
-      questions: {
-        where: {
-          question: {
-            hiddenAt: null,
-            author: {
-              isActive: true
-            }
-          }
-        },
-        include: {
-          question: true
-        }
       }
     },
     orderBy: { name: "asc" }
   });
 
-  return tags.sort((a, b) => b._count.questions - a._count.questions);
+  const tagStats = await prisma.questionTag.groupBy({
+    by: ["tagId"],
+    where: {
+      question: {
+        hiddenAt: null,
+        author: {
+          isActive: true
+        }
+      }
+    },
+    _count: {
+      questionId: true
+    }
+  });
+  const solvedTagStats = await prisma.questionTag.groupBy({
+    by: ["tagId"],
+    where: {
+      question: {
+        hiddenAt: null,
+        acceptedAnswerId: { not: null },
+        author: {
+          isActive: true
+        }
+      }
+    },
+    _count: {
+      questionId: true
+    }
+  });
+
+  const totalByTag = new Map(tagStats.map((item) => [item.tagId, item._count.questionId]));
+  const solvedByTag = new Map(solvedTagStats.map((item) => [item.tagId, item._count.questionId]));
+
+  return tags
+    .map((tag) => {
+      const questionCount = totalByTag.get(tag.id) ?? 0;
+      const solvedQuestionCount = solvedByTag.get(tag.id) ?? 0;
+      return {
+        ...tag,
+        _count: {
+          ...tag._count,
+          questions: questionCount
+        },
+        questionCount,
+        solvedQuestionCount,
+        unsolvedQuestionCount: questionCount - solvedQuestionCount
+      };
+    })
+    .sort((a, b) => b.questionCount - a.questionCount);
 }
+
+export const getTags = unstable_cache(getTagsFresh, ["public-tags"], {
+  revalidate: 60
+});
 
 export async function getProfile(userId: string) {
   return prisma.user.findUnique({
@@ -281,13 +343,22 @@ export async function getUserProfile(userId: string) {
   });
 }
 
-export async function getLeaderboard() {
+async function getLeaderboardFresh() {
   return prisma.user.findMany({
     where: { isActive: true },
     orderBy: { score: "desc" },
-    take: 5
+    take: 5,
+    select: {
+      id: true,
+      name: true,
+      score: true
+    }
   });
 }
+
+export const getLeaderboard = unstable_cache(getLeaderboardFresh, ["public-leaderboard"], {
+  revalidate: 60
+});
 
 export async function getAdminDashboard() {
   const [
@@ -705,7 +776,7 @@ export async function getAdminTags({
   return { tags: tagSummaries, pagination: pagination(currentPage, total) };
 }
 
-export async function getQuestionStats() {
+async function getQuestionStatsFresh() {
   const [questionCount, answerCount, unsolvedCount, tagCount] = await Promise.all([
     prisma.question.count({ where: { hiddenAt: null, author: { isActive: true } } }),
     prisma.answer.count({ where: { hiddenAt: null, author: { isActive: true }, question: { hiddenAt: null } } }),
@@ -720,6 +791,10 @@ export async function getQuestionStats() {
     tagCount
   };
 }
+
+export const getQuestionStats = unstable_cache(getQuestionStatsFresh, ["public-question-stats"], {
+  revalidate: 60
+});
 
 export async function getRelatedQuestions(questionId: string, tagSlugs: string[]) {
   if (!tagSlugs.length) return [];

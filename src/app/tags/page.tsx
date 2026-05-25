@@ -24,8 +24,8 @@ export default async function TagsPage({ searchParams }: PageProps) {
     .slice(0, 3)
     .map((tag) => ({
       name: tag.name,
-      unresolved: tag.questions.filter(({ question }) => !question.acceptedAnswerId).length,
-      solved: tag.questions.filter(({ question }) => question.acceptedAnswerId).length
+      unresolved: tag.unsolvedQuestionCount,
+      solved: tag.solvedQuestionCount
     }));
 
   return (
@@ -48,8 +48,7 @@ export default async function TagsPage({ searchParams }: PageProps) {
                   <span className="status-pill open">{tag._count.questions} 个问题</span>
                 </div>
                 <p>
-                  {tag.questions.filter(({ question }) => !question.acceptedAnswerId).length} 个未解决，
-                  {tag.questions.filter(({ question }) => question.acceptedAnswerId).length} 个已采纳。
+                  {tag.unsolvedQuestionCount} 个未解决，{tag.solvedQuestionCount} 个已采纳。
                 </p>
                 <div className="tag-cloud">
                   <Link className="tag selected" href={`/?tag=${tag.slug}`}>
