@@ -225,27 +225,29 @@ export default async function ProfilePage({ searchParams }: PageProps) {
       </section>
 
       <aside className="side-stack">
-        <section className="summary-card">
-          <h3>积分拆分</h3>
-          <div className="summary-grid">
-            <div className="summary-box">
-              <strong>{breakdown.answer}</strong>
-              <span>回答积分</span>
+        {isOwnProfile && (
+          <section className="summary-card">
+            <h3>积分拆分</h3>
+            <div className="summary-grid">
+              <div className="summary-box">
+                <strong>{breakdown.answer}</strong>
+                <span>回答积分</span>
+              </div>
+              <div className="summary-box">
+                <strong>{breakdown.accept}</strong>
+                <span>采纳积分</span>
+              </div>
+              <div className="summary-box">
+                <strong>{breakdown.question}</strong>
+                <span>提问积分</span>
+              </div>
+              <div className="summary-box">
+                <strong>{breakdown.vote}</strong>
+                <span>点赞积分</span>
+              </div>
             </div>
-            <div className="summary-box">
-              <strong>{breakdown.accept}</strong>
-              <span>采纳积分</span>
-            </div>
-            <div className="summary-box">
-              <strong>{breakdown.question}</strong>
-              <span>提问积分</span>
-            </div>
-            <div className="summary-box">
-              <strong>{breakdown.vote}</strong>
-              <span>点赞积分</span>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
       </aside>
     </main>
   );
