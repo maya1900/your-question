@@ -530,14 +530,15 @@ export async function checkInAction(): Promise<ActionState> {
   return success(`签到成功！连续签到 ${result.continuousDays} 天，获得 ${result.totalPoints} 积分。`);
 }
 
-export async function markNotificationReadAction(notificationId: string): Promise<ActionState> {
+export async function markNotificationReadAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const user = await requireUser();
+  const notificationId = formData.get("notificationId") as string;
   await markNotificationAsRead(notificationId, user.id);
   revalidatePath("/notifications");
   return success("已标记为已读");
 }
 
-export async function markAllNotificationsReadAction(): Promise<ActionState> {
+export async function markAllNotificationsReadAction(_prev: ActionState): Promise<ActionState> {
   const user = await requireUser();
   await markAllNotificationsAsRead(user.id);
   revalidatePath("/notifications");

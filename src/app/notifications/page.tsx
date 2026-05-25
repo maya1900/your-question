@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { getNotifications } from "@/lib/data";
 import { formatRelativeTime } from "@/lib/format";
-import { markNotificationReadAction, markAllNotificationsReadAction } from "@/app/actions";
+import { MarkAsReadButton, MarkAllReadButton } from "./_components/notification-buttons";
 
 export const dynamic = "force-dynamic";
 
@@ -12,26 +12,6 @@ function notificationIcon(type: string) {
   if (type === "ANSWER_ACCEPTED") return "✅";
   if (type === "QUESTION_UPVOTED" || type === "ANSWER_UPVOTED") return "👍";
   return "🔔";
-}
-
-async function MarkAsReadButton({ notificationId }: { notificationId: string }) {
-  return (
-    <form action={markNotificationReadAction.bind(null, notificationId)}>
-      <button type="submit" className="btn ghost small">
-        标记已读
-      </button>
-    </form>
-  );
-}
-
-async function MarkAllReadButton() {
-  return (
-    <form action={markAllNotificationsReadAction}>
-      <button type="submit" className="btn ghost small">
-        全部已读
-      </button>
-    </form>
-  );
 }
 
 export default async function NotificationsPage() {
