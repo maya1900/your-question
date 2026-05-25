@@ -15,7 +15,7 @@
 
 - 创建 Next.js 基础配置。
 - 配置 TypeScript、ESLint、Next config。
-- 配置 Prisma、SQLite 和环境变量。
+- 配置 Prisma、PostgreSQL 和环境变量。
 - 定义数据库 schema。
 
 状态：已完成。

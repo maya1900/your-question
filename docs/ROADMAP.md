@@ -399,7 +399,7 @@
 
 ### 后端
 - **框架**：Next.js API Routes / Server Actions
-- **数据库**：SQLite (开发) / PostgreSQL (生产推荐)
+- **数据库**：PostgreSQL
 - **ORM**：Prisma
 - **认证**：自定义 Session (基于 Cookie)
 - **密码加密**：bcrypt
@@ -443,7 +443,8 @@
 npm install
 
 # 初始化数据库
-npx prisma migrate dev
+npm run db:deploy
+npm run db:seed
 
 # 启动开发服务器
 npm run dev
@@ -469,8 +470,7 @@ npm start
 
 ```env
 # 数据库
-DATABASE_URL="file:./dev.db"  # 开发环境
-# DATABASE_URL="postgresql://..."  # 生产环境
+DATABASE_URL="postgresql://your_question:your_question@localhost:5432/your_question_dev?schema=public"
 
 # Session 密钥
 SESSION_SECRET="your-secret-key"

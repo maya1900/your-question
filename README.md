@@ -123,7 +123,7 @@
 - **[Next.js API Routes](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)** - API 接口
 - **[Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)** - 服务端操作
 - **[Prisma](https://www.prisma.io/)** - ORM 数据库工具
-- **[SQLite](https://www.sqlite.org/)** - 开发环境数据库
+- **PostgreSQL** - 开发和生产环境数据库
 - **[bcrypt](https://github.com/kelektiv/node.bcrypt.js)** - 密码加密
 
 ### 部署
@@ -138,6 +138,7 @@
 
 - Node.js 18.17 或更高版本
 - npm 或 yarn 或 pnpm
+- PostgreSQL 数据库（本地可用 Docker 启动）
 
 ### 安装步骤
 
@@ -160,7 +161,7 @@ npm install
 
 ```env
 # 数据库
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="postgresql://your_question:your_question@localhost:5432/your_question_dev?schema=public"
 
 # Session 密钥（请修改为随机字符串）
 SESSION_SECRET="your-random-secret-key-here"
@@ -172,7 +173,8 @@ NODE_ENV="development"
 4. **初始化数据库**
 
 ```bash
-npx prisma migrate dev
+npm run db:deploy
+npm run db:seed
 ```
 
 5. **（可选）填充测试数据**

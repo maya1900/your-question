@@ -5,7 +5,7 @@
 - 框架：Next.js App Router。
 - 语言：TypeScript。
 - UI：React Server Components + 少量 Client Components。
-- 数据库：SQLite。
+- 数据库：PostgreSQL。
 - ORM：Prisma。
 - 认证：自实现邮箱密码认证和 httpOnly cookie session。
 - 校验：Zod。
