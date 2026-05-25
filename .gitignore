@@ -2,8 +2,11 @@
 .env
 .env.local
 .env*.local
+.env.production
+.env.temp
 .codegraph/
 .cursor/
+.vercel/
 node_modules/
 .next/
 out/
@@ -15,4 +18,7 @@ prisma/dev.db
 prisma/dev.db-journal
 prisma/dev.db-wal
 prisma/dev.db-shm
-.vercel
+
+# 临时文件
+migrate-to-postgres.sql
+setup-db.sh
