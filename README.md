@@ -35,6 +35,7 @@
 ### 核心功能
 
 #### 📝 问答系统
+
 - 发布问题，支持富文本编辑
 - 提交回答，分享你的经验
 - 点赞优质内容
@@ -44,17 +45,20 @@
 - 智能搜索（标题、正文、作者）
 
 #### 🏆 积分系统
+
 - 发布问题、回答、点赞、采纳获得积分
 - 积分等级系统，展示你的贡献
 - 积分榜，看看谁是社区之星
 - 积分详情和拆分（私密）
 
 #### ✅ 签到系统
+
 - 每日签到获得积分
 - 连续签到额外奖励
 - 签到日历，记录你的坚持
 
 #### 🔔 通知系统
+
 - 问题被回答时通知
 - 回答被采纳时通知
 - 内容获得点赞时通知
@@ -62,11 +66,13 @@
 - 一键标记全部已读
 
 #### 👥 关注系统
+
 - 关注感兴趣的用户
 - 查看关注数和粉丝数
 - 关注按钮快速操作
 
 #### ✍️ 富文本编辑器
+
 - 基于 Tiptap 的现代化编辑器
 - 支持粗体、斜体、标题
 - 支持列表、代码块、引用
@@ -74,12 +80,14 @@
 - 链接插入
 
 #### 👤 用户系统
+
 - 用户注册、登录、登出
 - 个人资料页（支持查看他人资料）
 - 个人设置（修改用户名、邮箱、密码）
 - 隐私保护（积分详情、签到记录等私密信息）
 
 #### 🛡️ 管理后台
+
 - 用户管理（查看、编辑、停用、删除）
 - 问题管理（查看、隐藏、删除）
 - 回答管理（查看、隐藏、删除）
@@ -91,28 +99,41 @@
 ## 🖼️ 界面预览
 
 ### 首页 - 问题列表
+
 展示所有问题，支持按热度、最新、未解决排序，标签筛选和搜索。
 
+![首页 - 问题列表](preview/img/home.jpg)
+
 ### 问题详情
+
 查看问题详情、回答列表，支持点赞、采纳答案、提交回答。
 
+![问题详情](preview/img/question-detail.jpg)
+
 ### 发布问题
+
 使用富文本编辑器发布问题，支持格式化文本、代码块、链接等。
 
+![发布问题](preview/img/ask.jpg)
+
 ### 个人资料
+
 查看用户资料、问题、回答、积分详情、签到记录，支持关注用户。
 
-### 富文本编辑器
-现代化的富文本编辑器，支持多种格式和代码高亮。
+![个人资料](preview/img/profile.jpg)
 
 ### 通知中心
+
 查看所有通知，支持标记已读和全部已读。
+
+![通知中心](preview/img/notifications.jpg)
 
 ---
 
 ## 🛠️ 技术栈
 
 ### 前端
+
 - **[Next.js 15](https://nextjs.org/)** - React 框架，使用 App Router
 - **[TypeScript](https://www.typescriptlang.org/)** - 类型安全的 JavaScript
 - **[Tiptap](https://tiptap.dev/)** - 富文本编辑器
@@ -120,6 +141,7 @@
 - **CSS** - 自定义样式
 
 ### 后端
+
 - **[Next.js API Routes](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)** - API 接口
 - **[Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)** - 服务端操作
 - **[Prisma](https://www.prisma.io/)** - ORM 数据库工具
@@ -127,6 +149,7 @@
 - **[bcrypt](https://github.com/kelektiv/node.bcrypt.js)** - 密码加密
 
 ### 部署
+
 - **[Vercel](https://vercel.com/)** - 推荐部署平台
 - **PostgreSQL** - 生产环境数据库（推荐）
 
@@ -184,6 +207,7 @@ npm run db:seed
 ```
 
 测试账号（密码均为 `password123`）：
+
 - `linyue@example.com`
 - `zhouran@example.com`
 - `guche@example.com`
@@ -227,6 +251,7 @@ npx prisma studio
    - 导入你的 GitHub 仓库
 
 3. **配置环境变量**
+
    ```env
    DATABASE_URL="postgresql://..."  # 使用 Vercel Postgres 或其他 PostgreSQL 数据库
    SESSION_SECRET="your-random-secret-key"
