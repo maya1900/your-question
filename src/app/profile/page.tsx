@@ -43,8 +43,12 @@ function eventTitle(type: string) {
   return titles[type] ?? "积分变化";
 }
 
-function tabHref(tab: TabType) {
-  return tab === "questions" ? "/profile" : `/profile?tab=${tab}`;
+function tabHref(tab: TabType, userId?: string) {
+  const params = new URLSearchParams();
+  if (userId) params.set("userId", userId);
+  if (tab !== "questions") params.set("tab", tab);
+  const query = params.toString();
+  return query ? `/profile?${query}` : "/profile";
 }
 
 export default async function ProfilePage({ searchParams }: PageProps) {
@@ -122,7 +126,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
                 ? (["questions", "answers", "tags", "score", "checkin", "settings"] as TabType[])
                 : (["questions", "answers", "tags", "score"] as TabType[])
               ).map((item) => (
-                <Link aria-current={tab === item} href={tabHref(item)} key={item}>
+                <Link aria-current={tab === item} href={tabHref(item, isOwnProfile ? undefined : userId)} key={item}>
                   {item === "questions"
                     ? "问题"
                     : item === "answers"
