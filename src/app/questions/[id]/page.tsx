@@ -6,6 +6,7 @@ import { acceptAnswerAction } from "@/app/actions";
 import { AnswerForm } from "@/components/answer-form";
 import { SubmitButton } from "@/components/submit-button";
 import { AnswerVoteForm, QuestionVoteForm } from "@/components/vote-form";
+import { RichTextViewer } from "@/components/rich-text-viewer";
 import { getQuestionById, getRelatedQuestions } from "@/lib/data";
 import { compactNumber, formatRelativeTime, initials } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
@@ -87,11 +88,11 @@ export default async function QuestionDetailPage({ params, searchParams }: PageP
             </div>
             <h1>{question.title}</h1>
             <div className="detail-body">
-              <p>{question.body}</p>
+              <RichTextViewer content={question.body} />
               {question.details ? (
-                <pre className="code-block">
-                  <code>{question.details}</code>
-                </pre>
+                <div style={{ marginTop: 16 }}>
+                  <RichTextViewer content={question.details} />
+                </div>
               ) : null}
             </div>
             <div className="button-row" style={{ marginTop: 16 }}>
@@ -137,7 +138,7 @@ export default async function QuestionDetailPage({ params, searchParams }: PageP
                       </div>
                       <div className="answer-content">
                         {answer.summary ? <p><strong>{answer.summary}</strong></p> : null}
-                        <p>{answer.body}</p>
+                        <RichTextViewer content={answer.body} />
                       </div>
                       <div className="button-row" style={{ marginTop: 14 }}>
                         <AnswerVoteForm

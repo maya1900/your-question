@@ -1,12 +1,14 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createAnswerAction } from "@/app/actions";
 import { scoreValues } from "@/lib/constants";
 import { SubmitButton } from "@/components/submit-button";
+import { RichTextEditor } from "@/components/rich-text-editor";
 
 export function AnswerForm({ questionId }: { questionId: string }) {
   const [state, formAction] = useActionState(createAnswerAction, {});
+  const [body, setBody] = useState("");
 
   return (
     <form className="form-grid" action={formAction}>
@@ -26,13 +28,11 @@ export function AnswerForm({ questionId }: { questionId: string }) {
       </div>
       <div className="form-row">
         <label htmlFor="answer-body">回答内容</label>
-        <textarea
-          className="field"
-          id="answer-body"
-          name="body"
+        <input type="hidden" name="body" value={body} />
+        <RichTextEditor
+          content={body}
+          onChange={setBody}
           placeholder="写清楚步骤、限制和适用场景。"
-          minLength={10}
-          required
         />
         <p className="hint">有效回答可获得 {scoreValues.answerCreated} 积分。</p>
       </div>

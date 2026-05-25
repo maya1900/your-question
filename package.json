@@ -15,6 +15,11 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.2",
+    "@tiptap/extension-code-block-lowlight": "^3.23.6",
+    "@tiptap/extension-link": "^3.23.6",
+    "@tiptap/react": "^3.23.6",
+    "@tiptap/starter-kit": "^3.23.6",
+    "lowlight": "^3.3.0",
     "lucide-react": "^1.16.0",
     "next": "^16.2.6",
     "react": "^19.2.6",

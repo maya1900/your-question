@@ -4,10 +4,13 @@ import { useActionState, useState } from "react";
 import { createQuestionAction } from "@/app/actions";
 import { scoreValues } from "@/lib/constants";
 import { SubmitButton } from "@/components/submit-button";
+import { RichTextEditor } from "@/components/rich-text-editor";
 
 export function QuestionForm() {
   const [state, formAction] = useActionState(createQuestionAction, {});
   const [tags, setTags] = useState("");
+  const [body, setBody] = useState("");
+  const [details, setDetails] = useState("");
 
   return (
     <form className="form-grid" action={formAction}>
@@ -42,22 +45,20 @@ export function QuestionForm() {
       </div>
       <div className="form-row">
         <label htmlFor="ask-body">问题描述</label>
-        <textarea
-          className="field"
-          id="ask-body"
-          name="body"
+        <input type="hidden" name="body" value={body} />
+        <RichTextEditor
+          content={body}
+          onChange={setBody}
           placeholder="描述背景、尝试过的方法、卡住的地方。"
-          minLength={10}
-          required
         />
         <p className="hint">建议说明背景、尝试过什么、你想得到什么答案。</p>
       </div>
       <div className="form-row">
         <label htmlFor="ask-details">补充信息</label>
-        <textarea
-          className="field"
-          id="ask-details"
-          name="details"
+        <input type="hidden" name="details" value={details} />
+        <RichTextEditor
+          content={details}
+          onChange={setDetails}
           placeholder="例如预算、时间限制、地区、设备条件等。"
         />
       </div>

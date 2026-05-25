@@ -1467,3 +1467,123 @@ textarea.field {
   gap: 16px;
   align-items: start;
 }
+
+/* Rich Text Editor */
+.rich-text-editor {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.editor-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  flex-wrap: wrap;
+}
+
+.editor-toolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.editor-toolbar button:hover {
+  background: var(--surface);
+}
+
+.editor-toolbar button.active {
+  background: var(--accent);
+  color: white;
+}
+
+.rich-text-content {
+  padding: 16px;
+  min-height: 200px;
+  outline: none;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.rich-text-content:focus {
+  outline: none;
+}
+
+.rich-text-content p {
+  margin: 0 0 12px;
+}
+
+.rich-text-content p:last-child {
+  margin-bottom: 0;
+}
+
+.rich-text-content h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 20px 0 12px;
+}
+
+.rich-text-content h2:first-child {
+  margin-top: 0;
+}
+
+.rich-text-content ul,
+.rich-text-content ol {
+  margin: 12px 0;
+  padding-left: 24px;
+}
+
+.rich-text-content li {
+  margin: 4px 0;
+}
+
+.rich-text-content code {
+  background: var(--surface-2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+  font-size: 14px;
+}
+
+.rich-text-content pre {
+  background: var(--surface-2);
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.rich-text-content pre code {
+  background: none;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.rich-text-content blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 16px;
+  margin: 12px 0;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.rich-text-content a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.rich-text-content a:hover {
+  text-decoration: none;
+}
